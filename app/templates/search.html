@@ -1,0 +1,142 @@
+<form class="form" method="POST">
+    {{ form.hidden_tag() }}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-6"></div>
+            <div class="col-xs-6">
+                <span class="pull-right">
+                    {{ form.submit_button(class_="btn btn-primary") }}
+                    <button class="btn btn-default">Download</button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+             <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.partner_name.label(class_="control-label") }}
+                    {{ form.partner_name(class_="form-control") }}
+                </div>
+             </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.partner_industry.label(class_="control-label") }}
+                    {{ form.partner_industry(class_="form-control") }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.partnership_level.label(class_="control-label") }}
+                    {{ form.partnership_level(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.partner_type.label(class_="control-label") }}
+                    {{ form.partner_type(class_="container") }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.business_unit.label(class_="control-label") }}
+                    {{ form.business_unit(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.region.label(class_="control-label") }}
+                    {{ form.region(class_="form-control") }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.country.label(class_="control-label") }}
+                    {{ form.country(class_="form-control") }}
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.competitor.label(class_="control-label") }}
+                    {{ form.competitor() }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <table id="search-results-table"
+               data-toggle="table"
+               data-sort-name="partner_name"
+               data-sort-order="asc"
+               data-striped="true">
+            <thead>
+            <tr>
+                <th class="col-xs-3"
+                    data-field="partner_name"
+                    data-sortable="true">
+                    Partner name
+                </th>
+                <th class="col-xs-2"
+                    data-field="partner_industry"
+                    data-sortable="true">
+                    Partner industry
+                </th>
+                <th class="col-xs-1"
+                    data-field="partnership_level"
+                    data-sortable="true">
+                    Partnership level
+                </th>
+                <th class="col-xs-1"
+                    data-field="partner_type"
+                    data-sortable="true">
+                    Partner type
+                </th>
+                <th class="col-xs-1"
+                    data-field="business_unit"
+                    data-sortable="true">
+                    Business unit
+                </th>
+                <th class="col-xs-2"
+                    data-field="region"
+                    data-sortable="true">
+                    Region
+                </th>
+                <th class="col-xs-2"
+                    data-field="country"
+                    data-sortable="true">
+                    Country
+                </th>
+            </tr>
+            </thead>
+            <!-- Sample data -->
+            <tbody>
+                <tr>
+                    <td>Partner name 1</td>
+                    <td>IT</td>
+                    <td>1</td>
+                    <td>Brilliant</td>
+                    <td>Customer</td>
+                    <td>Europe</td>
+                    <td>France</td>
+                </tr>
+                <tr>
+                    <td>Partner name 2</td>
+                    <td>Finance</td>
+                    <td>2</td>
+                    <td>Gold</td>
+                    <td>Support</td>
+                    <td>Europe</td>
+                    <td>Germany</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</form>

@@ -22,8 +22,33 @@
     options['resolution'] = 'countries';
     options['width'] = '100%';
     options['colorAxis'] = {minValue: 0,  colors: ['#ddeef8', '#a3d6fb','#0078c0', '#ffe04e', '#f8931f', '#d54215',]}
-    var map = new google.visualization.GeoChart(document.getElementById('chart_div'));
-    map.draw(data, options);
+    var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
+
+    function myClickHandler(){
+        var selection = chart.getSelection();
+        var message = '';
+        for (var i = 0; i < selection.length; i++) {
+            var item = selection[i];
+            if (item.row != null && item.column != null) {
+                message += '{row:' + item.row + ',column:' + item.column + '}';
+            } else if (item.row != null) {
+                message += '{row:' + item.row + '}';
+            } else if (item.column != null) {
+                message += '{column:' + item.column + '}';
+            }
+        }
+        if (message == '') {
+            message = 'nothing';
+        }
+        alert('You selected ' + message);
+    }
+
+    google.visualization.events.addListener(chart, 'select', myClickHandler);
+
+
+
+    
+    chart.draw(data, options);
   };
   </script>
 

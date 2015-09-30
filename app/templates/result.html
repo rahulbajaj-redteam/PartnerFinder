@@ -285,30 +285,44 @@
 		<script type="text/javascript">
 		google.load("visualization", "1", {packages:["table","map"]});
 
-
 		google.setOnLoadCallback(drawTable);
 		google.setOnLoadCallback(drawMap);
+		google.setOnLoadCallback(initialize);
 
+            var table;
 		function drawTable() {
-        	   var data = new google.visualization.DataTable();
-        	   data.addColumn('string', '');
-            data.addRows({{df | safe}})
-            var table = new google.visualization.Table(document.getElementById('table_div')        );
-            table.draw(data, {showRowNumber: false, page: 'enable', pageSize: '10', width : '100%', height : '100%' , allowHtml : true});
-		}
+            	   var data = new google.visualization.DataTable();
+            	   data.addColumn('string', '');
+                    data.addRows({{df | safe}})
+                    table = new google.visualization.Table(document.getElementById('table_div'));
+                    table.draw(data, {showRowNumber: false, page: 'enable', pageSize: '10', width : '100%', height : '100%' , allowHtml : true});
+        		}
         
+            var map;
+            function drawMap() {
+                var data = google.visualization.arrayToDataTable({{geoData|safe}});
+                var options = { showTip: true };
+                map = new google.visualization.Map(document.getElementById('map_div'));
+                map.draw(data, options);
+              };
 
-        function drawMap() {
-            var data = google.visualization.arrayToDataTable({{geoData|safe}});
-            var options = { showTip: true };
-            var map = new google.visualization.Map(document.getElementById('map_div'));
-            map.draw(data, options);
+            function initialize()
+            {
 
-          };
+                google.visualization.events.addListener(table, 'select',
+                function() {
+                  map.setSelection(table.getSelection());
+                });
+        
+                google.visualization.events.addListener(map, 'select',
+                function() {
+                  table.setSelection(map.getSelection());
+                });
+
+            }
 
 		</script>
     {% if nrows > 0 %}  
-
               <table align="center" style="width: 90%;">
                   <tr valign="top" >
                     <td style="width: 50%;">

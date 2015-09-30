@@ -14,7 +14,7 @@ from .SearchForm import SearchForm
 from sqlalchemy import create_engine 
 import pandas as pd            
 from pandas import DataFrame
-from flask import Flask, url_for , request, render_template, Response,redirect,flash,jsonify,make_response
+from flask import Flask , request, render_template, Response,redirect,jsonify,make_response,session
 from neo4jrestclient.client import GraphDatabase
 from neo4jrestclient.constants import RAW
 from neo4jrestclient.client import Node 
@@ -131,10 +131,16 @@ def search():
     x= DataFrame(x)
     nrows = len(x.index)
     variable = []
-    geo = []
+    geo = [['Lat', 'Long', 'Name']]
     for j in range(0,len(x.ix[:,:])):
         variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])).upper() + str('<BR>') + str('<a href = /PWeb/') + str(x.ix[j,3]) + str('  target = "_blank" >WebSite</a>') + str('&nbsp;&nbsp;|&nbsp;&nbsp;<a href="PDetails/') + str(x.ix[j,4]) + str('" target = "_blank" > Details</a>') ])
-        geo.append([str(filter(lambda x: x in string.printable, x.ix[j,1]))])      
+        #loc = str(x.ix[j,5])[1:len(x.ix[j,5])-1] + ',' + str(filter(lambda x: x in string.printable, x.ix[j,0])).upper()
+        try:
+            lat = float(str(x.ix[j,5])[1:str(x.ix[j,5]).find(',')-1])
+            long =float(str(x.ix[j,5])[str(x.ix[j,5]).find(',')+1:len(str(x.ix[j,5]))-1])
+            geo.append([lat,long,str(filter(lambda x: x in string.printable, x.ix[j,0])).upper()])      
+        except:
+            pass
     return render_template('result.html', title='Red Hat : Partner Finder', df=variable,query=str(query),form=form,geoData=geo,nrows=nrows,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req)
                                
 
@@ -185,6 +191,8 @@ def getCompAssociationDetails(id):
             htmlText =  htmlText + str("<br><br><b>")+ str(CDet[4])[27:] + str("</b></br></br>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
         else:
             htmlText =  htmlText + str("   <p>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
+
+
     if data['Citrix_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str("<h3>Citrix</h3>  <div>  ")    
         CDet = getCitrixAssDet(id)
@@ -278,10 +286,76 @@ def getCompAssociationDetails(id):
     if data['SAP_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str("<h3>SAP</h3>  <div>    <p>SAP Partner </p>  </div>")
 
+
+
+
     if data['VMWare_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>VMWare</h3>  <div>    <p>VMWare Partner </p>  </div>")
+        htmlText =  htmlText + str("<h3>VMWare</h3>  <div>   ")
+        CDet = getVMWareAssDet(id)
+        VM_PLevel = ''
+        VM_Soln_Competency = ''
+        VM_PartnerProgram = ''
+        VM_VCPs = 0
+        VM_VTSPs= 0
+        VM_VSPs=0
+        VM_VSPCPs = 0 
+        VM_VOPs = 0
+        VM_ResellerVLEs = 0
+        VM_DistiVLEs =0
+
+        #VMPPDet 
+# VMWARE Purchasing Program to be added / Partner Program aggregate s
+        
+        if CDet:
+            if len(str(CDet[1]))>3 and str(CDet[1]) != 'None':
+                VM_Soln_Competency = "<br><br><b>Solution Competency : </b>" + str(CDet[1])  
+            if len(str(CDet[2]))>3 and str(CDet[2]) != 'None':
+                VM_PLevel = "<br><br><b>Partnership Level : </b>" + str(CDet[2])  
+            if len(str(CDet[3]))>3 and str(CDet[3]) != 'None':
+                VM_PartnerProgram = "<br><br><b>Partner Program : </b>" + str(CDet[3])  
+            if  CDet[4] > 0 :
+                VM_VCPs = str("<br><br><b>VMware Certified Professionals : </b>") + str(CDet[4])
+            if  CDet[5] > 0 :
+                VM_VTSPs = str("<br><br><b>VMware Technical Solutions Professionals : </b>") + str(CDet[5])
+            if  CDet[6] > 0 :
+                VM_VSPs = str("<br><br><b>VMware Sales Professionals : </b>") + str(CDet[6])
+            if  CDet[7] > 0 :
+                VM_VSPCPs = str("<br><br><b>VSPCPs : </b>") + str(CDet[7])
+            if  CDet[8] > 0 :
+                VM_VOPs = str("<br><br><b>VMware Operations Professionals : </b>") + str(CDet[8])
+            if  CDet[9] > 0 :
+                VM_ResellerVLEs = str("<br><br><b>Total Reseller VLEs : </b>") + str(CDet[9])
+            if  CDet[10] > 0 :
+                VM_DistiVLEs = str("<br><br><b>Total Disti VLEs : </b>") + str(CDet[10])
+    
+        htmlText =  htmlText + VM_PLevel + VM_Soln_Competency + VM_PartnerProgram +VM_VCPs + VM_VTSPs + VM_VSPs + VM_VSPCPs + VM_VOPs +  VM_ResellerVLEs + VM_DistiVLEs +str("  </div>")
         
     return htmlText
+
+
+
+
+
+def getVMWareAssDet(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT VMWare_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    VMWare_Id = ''
+    while row is not None:
+        VMWare_Id =  row[0]
+        row = cur.fetchone()
+    cur.close()
+    
+    query = "SELECT DISTINCT VMWare_Partner_ID,SolutionCompetency,Level,PartnerProgram,TotalVCPs,TotalVTSPs,TotalVSPs,TotalVSPCPs,TotalVOPs,TotalResellerVLEs,TotalDistiVLEs FROM rhpartners.vmwareportal_partnerdata where VMWare_Partner_ID like '" + VMWare_Id +"' ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    cnx.close()
+    return row
+    
+
 
 
 
@@ -441,7 +515,7 @@ def mapview():
     if len(query) > 2:    
         x= getPartnersLoc(query)
     else: 
-        x= getPartnersLoc('')
+        x= getPartnersLoc('') 
     x= getPartnersLoc(query)
     x= DataFrame(x)  
     variable = []
@@ -716,12 +790,12 @@ def csv():
                  
 def getPartners(queryclause):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id from rhpartners.ptt "
+    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.ptt "
     
     if len(queryclause)>5:        
-        query = query + 'WHERE ' + str(queryclause) + ' LIMIT 250;'     
+        query = query + 'WHERE ' + str(queryclause) + ' Order by Coordinates desc LIMIT 250;'     
     else:
-        query = query + ' LIMIT 250;'
+        query = query + ' Order by Coordinates desc LIMIT 250 ;'
     data = pd.read_sql(query,cnx)
     
     if data is None:

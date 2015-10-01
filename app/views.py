@@ -59,7 +59,7 @@ def gdrive():
 @app.route('/graphview', methods=['GET', 'POST'])
 def search():
     query = ''
-    form = SearchForm()
+    form = SearchForm(csrf_enabled=False)
     productFilter = ''
     industryFilter = ''
    # if request.method == 'POST':
@@ -236,10 +236,37 @@ def getCompAssociationDetails(id):
         htmlText =  htmlText + str("") + Citrix_PLevel + Citrix_PType + Citrix_CertCount + Citrix_Products_Certified_to_Sell +str("</ul>")+ Citrix_Services_Offered + str("</ul>") + Citrix_Certifications_Held_by_Staff +  str("</ul></div>")
         
     if data['Dell_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>Dell</h3>  <div>    <p>Dell Partner </p>  </div>")
+        htmlText =  htmlText + str("<h3>Dell</h3>  <div> ")
+        CDet = getDellAssDet(id)  
+        Competencies =  ''
+        Relationship = ''
+        P_Customer = ''
+        if CDet[2]:            
+            if len(str(CDet[2]))>4:
+                Relationship = str("</br></br><br><b>Relationship : </b>") + str(CDet[2])
+                
+        if CDet[1]:            
+            if len(str(CDet[1]))>4:
+                Competencies = str("</br></br><b>Competencies : </b>") + str(CDet[1])
 
+
+        if CDet[3]:            
+            if len(str(CDet[3]))>4:
+                P_Customer = str("</br></br><b>Primary Customer : </b>") + str(CDet[3])
+
+
+        htmlText =  htmlText +P_Customer+ Relationship + Competencies + str("  </div>")
+        
+        
+        
+        
+        
     if data['IBM_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str("<h3>IBM</h3>  <div>    <p>IBM Partner </p>  </div>")   
+
+
+
+
 
     if data['MS_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str("<h3>MS</h3><div>")
@@ -261,9 +288,9 @@ def getCompAssociationDetails(id):
         if CDet[3]:            
             if len(str(CDet[3]))>4:
                 Services = str("<br><b>Services : </b><ul><li>") + str(CDet[3]).replace("|","</li><li>")
-
-
         htmlText =  htmlText + Avg_Rating + Applications + str("</ul>") + Competencies + str("</ul>") + str("  </div>")
+        
+        
         
     if data['Oracle_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str("<h3>Oracle</h3>  <div> ")
@@ -331,6 +358,34 @@ def getCompAssociationDetails(id):
         htmlText =  htmlText + VM_PLevel + VM_Soln_Competency + VM_PartnerProgram +VM_VCPs + VM_VTSPs + VM_VSPs + VM_VSPCPs + VM_VOPs +  VM_ResellerVLEs + VM_DistiVLEs +str("  </div>")
         
     return htmlText
+
+
+
+
+
+
+def getDellAssDet(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT Dell_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    Dell_Id = ''
+    while row is not None:
+        Dell_Id =  row[0]
+        row = cur.fetchone()
+    cur.close()
+    
+    query = "SELECT `dell_partnerdetails`.`PartnerId`,`dell_partnerdetails`.`Competencies`,`dell_partnerdetails`.`Relationship`  ,`dell_partnerdetails`.`P_PrimaryCustomer`  FROM `rhpartners`.`dell_partnerdetails` where PartnerId like '" + Dell_Id +"' ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    cnx.close()
+    return row
+
+
+
+
 
 
 
@@ -458,7 +513,7 @@ def getCitrixAssDet(id):
 
 @app.route('/mapview' , methods=['GET', 'POST'])
 def mapview():
-    form = SearchForm()
+    form = SearchForm(csrf_enabled=False)
     query = ''
     productFilter = ''
     industryFilter = ''
@@ -529,7 +584,7 @@ def mapview():
 
 @app.route('/graphview', methods=['GET', 'POST'])
 def graphview():
-    form = SearchForm()
+    form = SearchForm(csrf_enabled=False)
 #    results = graph.cypher.execute(
 #        "MATCH (m:Movie)<-[:ACTED_IN]-(a:Person) "
 #        "RETURN m.title as movie, collect(a.name) as cast "
@@ -570,7 +625,7 @@ def saveJson():
 @app.route('/download', methods=['GET', 'POST'])
 def download():
     query = ''
-    form = SearchForm()
+    form = SearchForm(csrf_enabled=False)
     productFilter = ''
     industryFilter = ''
     if request.method == 'POST':

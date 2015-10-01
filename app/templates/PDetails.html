@@ -106,7 +106,7 @@ table {
     </td>
     <td  class="container-fluid  bg-lgrey" >
          <br/>
-         <h5 valign = "top">   Website : {% if url != 'None'%} <a href = {{url | safe}}>{{url | safe}}</a>  {% endif %}</h5>
+         <h5 valign = "top">   Website : {% if url != 'None'%}{{url | safe}}  {% endif %}</h5>
          <h5 valign = "top">   Contact Number : {% if AD_Phone1 != 'None'%}  {{AD_Phone1 | safe}}  {% endif %} </h5>
          <h5 valign = "top">   Fax : {% if AD_Fax != 'None'%}  {{AD_Fax | safe}}  {% endif %}</h5>
          <h5 valign = "top">   Email : {% if email1 != 'None'%} <a href = {{email1 | safe}}>{{email1 | safe}}</a>  {% endif %}</h5>     

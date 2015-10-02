@@ -149,12 +149,79 @@ def search():
 
 @app.route('/PDetails/<id>' , methods=['GET', 'POST'])
 def PDetails(id):
-        df = getPartnerDetail(id)
-        Comp   = getCompAssociationDetails(id)
-        Overview = str(df['Overview'].iloc[0])
-        Overview = str(Overview)[0:Overview.find("', u")]
-        return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]), Comp = str(Comp)   )
+    df = getPartnerDetail(id)
+    Comp   = getCompAssociationDetails(id)
+    Attr = getPAttributes(id)
+    Industry = ''
+    Business_Process_Outsourcing_Partner_Flag =''
+    Global_Partner_Flag=''
+    Service_Partner_Flag=''
     
+    Service_Partner_Flag = str(Attr['Services_Partner'].iloc[0])
+    Global_Partner_Flag = str(Attr['Global_Partner'].iloc[0])
+    Business_Process_Outsourcing_Partner_Flag = str(Attr['Business_Process_Outsourcing_Partner'].iloc[0])
+    Industry = ''
+    if int(Attr['Ind_Banking'].iloc[0]) > 0:
+        Industry = Industry + 'Banking'
+    elif Attr['Ind_Computer_Services'].iloc[0] >0:
+        Industry = Industry + 'Computer Services'
+    elif Attr['Ind_Education'].iloc[0] >0:
+        Industry = Industry + 'Education'
+    elif Attr['Ind_Electronics'].iloc[0] >0:
+        Industry = Industry + 'Electronics'
+    elif Attr['Ind_Energy&Utilities'].iloc[0] >0:
+        Industry = Industry + 'Energy&Utilities'
+    elif Attr['Ind_FinancialMarkets'].iloc[0] >0:
+        Industry = Industry + 'Financial Markets'
+    elif Attr['Ind_Public_Sector'].iloc[0] >0:
+        Industry = Industry + 'Public Sector'
+    elif Attr['Ind_Healthcare'].iloc[0] >0:
+        Industry = Industry + 'Healthcare'
+    elif Attr['Ind_IndustrialProducts'].iloc[0] >0:
+        Industry = Industry + 'Industrial Products'
+    elif Attr['Ind_Insurance'].iloc[0] >0:
+        Industry = Industry + 'Insurance'
+    elif Attr['Ind_ProfessionalServices'].iloc[0] >0:
+        Industry = Industry + 'Professional Services'
+    elif Attr['Ind_Retail'].iloc[0] >0:
+        Industry = Industry + 'Retail'
+    elif Attr['Ind_Telecommunications'].iloc[0] >0:
+        Industry = Industry + 'Telecommunications'
+    elif Attr['Ind_WholesaleDistribution&Services'].iloc[0] >0:
+        Industry = Industry + 'Wholesale Distribution & Services'
+    elif Attr['Ind_Automotive'].iloc[0] >0:
+        Industry = Industry + 'Automotive'
+    elif Attr['Ind_ConsumerProducts'].iloc[0] >0:
+        Industry = Industry + 'Consumer Products'
+    elif Attr['Ind_Travel&Transportation'].iloc[0] >0:
+        Industry = Industry + 'Travel & Transportation'
+    elif Attr['Ind_Media&Entertainment'].iloc[0] >0:
+        Industry = Industry + 'Media & Entertainment'
+    elif Attr['Ind_Chemicals&Petroleum'].iloc[0] >0:
+        Industry = Industry + 'Chemicals & Petroleum'
+    elif Attr['Ind_LifeSciences'].iloc[0] >0:
+        Industry = Industry + 'Life Sciences'
+    elif Attr['Ind_Aerospace&Defense'].iloc[0] >0:
+        Industry = Industry + 'Aerospace & Defense'
+    elif Attr['Ind_EngineeringandConstruction'].iloc[0] >0:
+        Industry = Industry + 'Engineering and Construction'            
+        
+    Overview = str(df['Overview'].iloc[0])
+    Overview = str(Overview)[0:Overview.find("', u")]
+    return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]), Comp = str(Comp),Industry = Industry , Business_Process_Outsourcing_Partner_Flag=Business_Process_Outsourcing_Partner_Flag,Global_Partner_Flag=str(Attr['Global_Partner'].iloc[0]), Service_Partner_Flag=Service_Partner_Flag )
+    
+
+
+def getPAttributes(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT Services_Partner,Global_Partner,Business_Process_Outsourcing_Partner,Ind_Banking,Ind_Computer_Services,Ind_Education,Ind_Electronics,`Ind_Energy&Utilities`,Ind_FinancialMarkets,Ind_Public_Sector,Ind_Healthcare,Ind_IndustrialProducts,Ind_Insurance,Ind_ProfessionalServices,Ind_Retail,Ind_Telecommunications,`Ind_WholesaleDistribution&Services`,Ind_Automotive,Ind_ConsumerProducts,`Ind_Media&Entertainment`,`Ind_Travel&Transportation`,`Ind_Chemicals&Petroleum`,Ind_LifeSciences,`Ind_Aerospace&Defense`,`Ind_EngineeringandConstruction`  from rhpartners.ptt where id =" + id +" ;"
+    data = pd.read_sql(query,cnx) 
+    cnx.close()
+    if data is None:
+        return "Username or Password is wrong"
+    return data
+    
+
 
 
 
@@ -180,17 +247,8 @@ def getCompAssociationDetails(id):
     htmlText = ''
     
 
-    if data['RH_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>RH</h3>  <div>    <p>RH Partner </p>  </div>")
 
 
-    if data['Cisco_Partner_ID'].iloc[0] != '' :
-        CDet = getCiscoAssDet(id)
-        htmlText =  htmlText + str("<h3>Cisco</h3>  <div>    <p> <b> Partners Since : </b>") + str(CDet[2])        
-        if len(str(CDet[4]))>5:    
-            htmlText =  htmlText + str("<br><br><b>")+ str(CDet[4])[27:] + str("</b></br></br>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
-        else:
-            htmlText =  htmlText + str("   <p>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
 
 
     if data['Citrix_Partner_ID'].iloc[0] != '' :
@@ -234,6 +292,17 @@ def getCompAssociationDetails(id):
                     Citrix_Certifications_Held_by_Staff = str(Citrix_Certifications_Held_by_Staff)[:len(str(Citrix_Certifications_Held_by_Staff))-9]
         
         htmlText =  htmlText + str("") + Citrix_PLevel + Citrix_PType + Citrix_CertCount + Citrix_Products_Certified_to_Sell +str("</ul>")+ Citrix_Services_Offered + str("</ul>") + Citrix_Certifications_Held_by_Staff +  str("</ul></div>")
+        
+        
+    
+    if data['Cisco_Partner_ID'].iloc[0] != '' :
+        CDet = getCiscoAssDet(id)
+        htmlText =  htmlText + str("<h3>Cisco</h3>  <div>    <p> <b> Partners Since : </b>") + str(CDet[2])        
+        if len(str(CDet[4]))>5:    
+            htmlText =  htmlText + str("<br><br><b>")+ str(CDet[4])[27:] + str("</b></br></br>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
+        else:
+            htmlText =  htmlText + str("   <p>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
+    
         
     if data['Dell_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str("<h3>Dell</h3>  <div> ")
@@ -356,7 +425,10 @@ def getCompAssociationDetails(id):
                 VM_DistiVLEs = str("<br><br><b>Total Disti VLEs : </b>") + str(CDet[10])
     
         htmlText =  htmlText + VM_PLevel + VM_Soln_Competency + VM_PartnerProgram +VM_VCPs + VM_VTSPs + VM_VSPs + VM_VSPCPs + VM_VOPs +  VM_ResellerVLEs + VM_DistiVLEs +str("  </div>")
-        
+    
+    
+    if data['RH_Partner_ID'].iloc[0] != '' :
+        htmlText =  htmlText + str("<h3>RH</h3>  <div>    <p>RH Partner </p>  </div>")
     return htmlText
 
 

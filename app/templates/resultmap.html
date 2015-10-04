@@ -12,6 +12,8 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
   <meta charset="utf-8">
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript" src="/static/js/d3_v3.js"></script>
+
    <script type="text/javascript">
   
     google.load('visualization', '1', { 'packages': ['geochart'] });
@@ -44,18 +46,28 @@
     }
 
     google.visualization.events.addListener(chart, 'select', myClickHandler);
-
-
-
     
     chart.draw(data, options);
   };
   </script>
 
+
+
+
+
+
+
 </head>
 
 
 <body class="no-trans ">
+
+<div id="chart"></div>
+
+        <script type="text/javascript">
+            // Your beautiful D3 code will go here
+		d3.select("body").append("p").text("New paragraph!");
+        </script>
 
 <div style="background-color:white;">
 <img src="static/img/6aeadffdf8c17100308c8188f59090ee.iix.png" height="45" width="142"  >
@@ -294,4 +306,60 @@
 </tr>
 </table>
 	</body>
+
+
+
+
+
+<script type="text/javascript">
+		var w = 500,
+		    h = 100;
+
+		var svg = d3.select("#chart")
+			.append("svg")
+			.attr("width", w)
+			.attr("height", h);
+    	
+
+            var data = {{BarJson | safe}}
+		d3.json(data, function(json) {
+	
+			
+			var max_n = 0;
+			for (var d in data) {
+				max_n = Math.max(data[d].Count, max_n);
+			}
+		
+			var dx = w / max_n;
+			var dy = h / data.length;
+	
+			// bars
+			var bars = svg.selectAll(".bar")
+				.data(data)
+				.enter()
+				.append("rect")
+				.attr("class", function(d, i) {return "bar " + d.GeoCountry;})
+				.attr("x", function(d, i) {return 0;})
+				.attr("y", function(d, i) {return dy*i;})
+                       .attr("fill","green") 
+				.attr("width", function(d, i) {return dx*d.Count})
+				.attr("height", dy);
+
+	
+			// labels
+			var text = svg.selectAll("text")
+				.data(data)
+				.enter()
+				.append("text")
+				.attr("class", function(d, i) {return "label " + d.GeoCountry;})
+				.attr("x", 5)
+				.attr("y", function(d, i) {return dy*i + 15;})
+				.text( function(d) {return d.GeoCountry + " (" + d.Count  + ")";})
+				.attr("font-size", "15px")
+				.style("font-weight", "bold");
+		});
+
+	</script>
+
+
 </html>

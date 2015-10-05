@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Partner Finder | Red Hat</title>
+<title>MPartner Finder | Red Hat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -62,15 +62,23 @@
 
 <body class="no-trans ">
 
-<div id="chart"></div>
-
-        <script type="text/javascript">
-            // Your beautiful D3 code will go here
-		d3.select("body").append("p").text("New paragraph!");
-        </script>
-
 <div style="background-color:white;">
-<img src="static/img/6aeadffdf8c17100308c8188f59090ee.iix.png" height="45" width="142"  >
+    <div class="container-fluid">
+         <div class="row">
+            <div class="col-sm-4" >
+                    <img src="static/img/6aeadffdf8c17100308c8188f59090ee.iix.png" height="45" width="142"  >
+            </div>
+            <div class="col-sm-4" >
+            </div>
+            <div class="col-sm-4" >
+                
+               <ul class="nav navbar-nav navbar-right">
+                    <li class="active">
+                            <a href="/search">Tabular View<span class="sr-only">(current)</span></a>
+                    </li>       
+               </ul>
+            </div>
+    </div>
 </div>
 
 
@@ -262,36 +270,22 @@
        
     </div>
     <div class="col-sm-2">  
-       
-    </div>
-  </div>
-
-
-
-  <div class="row">
-    <div class="col-sm-4">   
-  
-    </div> 
-    <div class="col-sm-4">        
-    </div>
-    <div class="col-sm-4">  
-          <script src="/static/js/nav.js"></script>
-        <button type= "button" class="btn btn-success"  id ="graphview">Graph View</button> 
-        <button type= "submit" class="btn btn-warning"  value ="mapview">Map View</button> 
-        <button type= "button" class="btn btn-danger"  id ="tableview">Tabular View</button> 
- <br/>
-        <script type="text/javascript">
-                document.getElementById("tableview").onclick = function () {
-                location.href = "search";
-                };
-
-                document.getElementById("graphview").onclick = function () {
-                location.href = "graphview";
+               <button type= "submit" name ="search" id="search" class="btn btn-success" >Search</button> 
+        <button type="button" name ="reset" id= "reset" class="btn btn-warning">Reset</button> 
+      <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span> 
+     
+         <script type="text/javascript">
+                document.getElementById("reset").onclick = function () {
+                location.href = "/mapview";
                 };
         </script>
-        <br/>
     </div>
   </div>
+
+
+
+ 
+
 </div>
 </div>
 

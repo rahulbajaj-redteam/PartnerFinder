@@ -29,6 +29,7 @@ from datetime import date
 authenticate("localhost:7474", "neo4j", "password")
 graph = Graph("http://localhost:7474/db/data/")
 
+app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
 
 @app.route('/gdrive',methods=['GET'])
@@ -52,26 +53,27 @@ def gdrive():
 
 
 
+
+
+
 # index view function suppressed for brevity
 @app.route('/index')
 @app.route('/', methods= ['GET', 'POST'])
-@app.route('/search', methods=['GET', 'POST'])
-@app.route('/graphview', methods=['GET', 'POST'])
-def search():
+@app.route('/reset', methods= ['GET', 'POST'])
+def home():
     query = ''
     form = SearchForm(csrf_enabled=False)
     productFilter = ''
     industryFilter = ''
-   # if request.method == 'POST':
-    query = ''
     prod_req = str(form.prod_req.data)
+    session['prod_req'] = prod_req
     ind_req = str(form.ind_req.data)
+    session['ind_req'] = ind_req
     region_req = str(form.region_req.data)
     country_req = str(form.country_req.data)
     name_req = str(form.name_req.data)
     role_req = str(form.role_req.data)
-    level_req = str(form.level_req.data)
-
+    level_req = str(form.level_req.data)            
     CISCO_Partner_req = request.form.getlist('CISCOPartner')
     CITRIX_Partner_req = request.form.getlist('CITRIXPartner')
     MS_Partner_req = request.form.getlist('MSPartner')
@@ -82,6 +84,24 @@ def search():
     RH_Partner_req = str(form.RH_Partner_req.data)
     SAP_Partner_req = request.form.getlist('SAPPartner')
     Global_Partner_req = form.Global_Partner_req.data       
+    session['prod_req'] = prod_req
+    session['ind_req'] = ind_req
+    session['region_req'] = region_req
+    session['country_req'] = country_req
+    session['name_req'] = name_req
+    session['role_req'] = role_req
+    session['level_req'] = level_req
+    session['RH_Partner_req'] = RH_Partner_req
+    session['Global_Partner_req'] = Global_Partner_req
+    session['CISCO_Partner_req'] = CISCO_Partner_req
+    session['CITRIX_Partner_req'] = CITRIX_Partner_req
+    session['MS_Partner_req'] = MS_Partner_req
+    session['Dell_Partner_req'] = Dell_Partner_req
+    session['IBM_Partner_req'] = IBM_Partner_req
+    session['Oracle_Partner_req'] = Oracle_Partner_req
+    session['VM_Partner_req'] = VM_Partner_req
+    session['SAP_Partner_req'] = SAP_Partner_req      
+    
     
     if prod_req != 'Any':
         productFilter = getProductFilter(prod_req)
@@ -134,7 +154,154 @@ def search():
     geo = [['Lat', 'Long', 'Name']]
     for j in range(0,len(x.ix[:,:])):
         variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])).upper() + str('<BR>') + str('<a href = /PWeb/') + str(x.ix[j,3]) + str('  target = "_blank" >WebSite</a>') + str('&nbsp;&nbsp;|&nbsp;&nbsp;<a href="PDetails/') + str(x.ix[j,4]) + str('" target = "_blank" > Details</a>') ])
-        #loc = str(x.ix[j,5])[1:len(x.ix[j,5])-1] + ',' + str(filter(lambda x: x in string.printable, x.ix[j,0])).upper()
+        try:
+            lat = float(str(x.ix[j,5])[1:str(x.ix[j,5]).find(',')-1])
+            long =float(str(x.ix[j,5])[str(x.ix[j,5]).find(',')+1:len(str(x.ix[j,5]))-1])
+            geo.append([lat,long,str(filter(lambda x: x in string.printable, x.ix[j,0])).upper()])      
+        except:
+            pass
+    return render_template('result.html', title='Red Hat : Partner Finder', df=variable,query=str(query),form=form,geoData=geo,nrows=nrows,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req)
+                               
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# index view function suppressed for brevity
+@app.route('/search', methods=['GET', 'POST'])
+@app.route('/graphview', methods=['GET', 'POST'])
+def search():
+
+    query = ''
+    form = SearchForm(csrf_enabled=False)
+    productFilter = ''
+    industryFilter = ''
+    prod_req = ''
+    ind_req = ''
+    region_req=''
+    country_req = ''
+    name_req = ''
+    role_req = ''
+    level_req = ''
+    CISCO_Partner_req = ''
+    CITRIX_Partner_req = ''
+    MS_Partner_req = ''
+    Dell_Partner_req = ''
+    IBM_Partner_req = ''
+    Oracle_Partner_req = ''
+    VM_Partner_req = ''
+    RH_Partner_req = ''
+    SAP_Partner_req = ''
+    Global_Partner_req = ''
+#
+#
+#    rule = request.url_rule
+#
+#
+#    try:
+#        dummy = id
+#    except:
+#        dummy =0
+#        
+#        
+    prod_req = str(form.prod_req.data)
+    ind_req = str(form.ind_req.data)
+    region_req = str(form.region_req.data)
+    country_req = str(form.country_req.data)
+    name_req = str(form.name_req.data)
+    role_req = str(form.role_req.data)
+    level_req = str(form.level_req.data)
+    RH_Partner_req = str(form.RH_Partner_req.data)
+    Global_Partner_req = form.Global_Partner_req.data                
+    CISCO_Partner_req = request.form.getlist('CISCOPartner')
+    CITRIX_Partner_req = request.form.getlist('CITRIXPartner')
+    MS_Partner_req = request.form.getlist('MSPartner')
+    Dell_Partner_req = request.form.getlist('DellPartner')
+    IBM_Partner_req = request.form.getlist('IBMPartner')
+    Oracle_Partner_req = request.form.getlist('OraclePartner')
+    VM_Partner_req = request.form.getlist('VMPartner')      
+    SAP_Partner_req = request.form.getlist('SAPPartner')
+     
+    session['prod_req'] = prod_req
+    session['ind_req'] = ind_req
+    session['region_req'] = region_req
+    session['country_req'] = country_req
+    session['name_req'] = name_req
+    session['role_req'] = role_req
+    session['level_req'] = level_req
+    session['RH_Partner_req'] = RH_Partner_req
+    session['Global_Partner_req'] = Global_Partner_req
+    session['CISCO_Partner_req'] = CISCO_Partner_req
+    session['CITRIX_Partner_req'] = CITRIX_Partner_req
+    session['MS_Partner_req'] = MS_Partner_req
+    session['Dell_Partner_req'] = Dell_Partner_req
+    session['IBM_Partner_req'] = IBM_Partner_req
+    session['Oracle_Partner_req'] = Oracle_Partner_req
+    session['VM_Partner_req'] = VM_Partner_req
+    session['SAP_Partner_req'] = SAP_Partner_req
+
+
+    
+    if prod_req != 'Any':
+        productFilter = getProductFilter(prod_req)
+        query = query + str(productFilter)
+    if ind_req != 'Any' :
+        industryFilter = getIndustryFilter(ind_req)
+        if len(query)<5:
+            query = query + str(industryFilter)
+        else:
+            query = str(query) + ' and ' +  str(industryFilter)
+    if region_req != 'Any' :
+        if len(query)<5:
+            query = query + ' GeoRegion = "' + str(region_req) + '"'
+        else:
+            query = str(query) + ' and ' +  ' GeoRegion = "' + str(region_req) + '"'
+    if country_req != 'Any' :
+        if len(query)<5:
+            query = query + ' GeoCountry = "' + str(country_req) + '"'
+        else:
+            query = str(query) + ' and ' +  ' GeoCountry = "' + str(country_req) + '"'
+    if name_req != '' :
+        if len(query)<5:
+            query = query + ' Name like "%' + str(name_req) + '%" '
+        else:
+            query = str(query) + ' and ' +   ' Name like "%' + str(name_req) + '%" '        
+    if role_req != 'Any' :
+        roleFilter = getRoleFilter(role_req)
+        if len(query)<5:
+            query = query + str(roleFilter)
+        else:
+            query = str(query) + ' and ' +  str(roleFilter)  
+            
+    if level_req != 'Any' :
+        levelFilter = getlevelFilter(level_req)
+        if len(query)<5:
+            query = query + str(levelFilter)
+        else:
+            query = str(query) + ' and ' +  str(levelFilter)  
+
+            
+    query = setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req,RH_Partner_req)
+    if len(query) > 2:    
+        x= getPartners(query)
+    else: 
+        x= getPartners('')
+    x= getPartners(query)
+    x= DataFrame(x)
+    nrows = len(x.index)
+    variable = []
+    geo = [['Lat', 'Long', 'Name']]
+    for j in range(0,len(x.ix[:,:])):
+        variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])).upper() + str('<BR>') + str('<a href = /PWeb/') + str(x.ix[j,3]) + str('  target = "_blank" >WebSite</a>') + str('&nbsp;&nbsp;|&nbsp;&nbsp;<a href="PDetails/') + str(x.ix[j,4]) + str('" target = "_blank" > Details</a>') ])
         try:
             lat = float(str(x.ix[j,5])[1:str(x.ix[j,5]).find(',')-1])
             long =float(str(x.ix[j,5])[str(x.ix[j,5]).find(',')+1:len(str(x.ix[j,5]))-1])
@@ -318,18 +485,11 @@ def getCompAssociationDetails(id):
             if len(str(CDet[1]))>4:
                 Competencies = str("</br></br><b>Competencies : </b>") + str(CDet[1])
 
-
         if CDet[3]:            
             if len(str(CDet[3]))>4:
                 P_Customer = str("</br></br><b>Primary Customer : </b>") + str(CDet[3])
 
-
-        htmlText =  htmlText +P_Customer+ Relationship + Competencies + str("  </div>")
-        
-        
-        
-        
-        
+        htmlText =  htmlText +P_Customer+ Relationship + Competencies + str("  </div>")                                
     if data['IBM_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str("<h3>IBM</h3>  <div>    <p>IBM Partner </p>  </div>")   
 
@@ -583,19 +743,20 @@ def getCitrixAssDet(id):
 
 
 
+
 @app.route('/mapview' , methods=['GET', 'POST'])
 def mapview():
     form = SearchForm(csrf_enabled=False)
     query = ''
     productFilter = ''
     industryFilter = ''
-    #if request.method == 'POST':
     prod_req = str(form.prod_req.data)
     ind_req = str(form.ind_req.data)
     region_req = str(form.region_req.data)
     country_req = str(form.country_req.data)
     name_req = str(form.name_req.data)
     role_req = str(form.role_req.data)
+    level_req = str(form.level_req.data)
     RH_Partner_req = str(form.RH_Partner_req.data)
     Global_Partner_req = form.Global_Partner_req.data                
     CISCO_Partner_req = request.form.getlist('CISCOPartner')
@@ -606,6 +767,33 @@ def mapview():
     Oracle_Partner_req = request.form.getlist('OraclePartner')
     VM_Partner_req = request.form.getlist('VMPartner')      
     SAP_Partner_req = request.form.getlist('SAPPartner')
+     
+    session['prod_req'] = prod_req
+    session['ind_req'] = ind_req
+    session['region_req'] = region_req
+    session['country_req'] = country_req
+    session['name_req'] = name_req
+    session['role_req'] = role_req
+    session['level_req'] = level_req
+    session['RH_Partner_req'] = RH_Partner_req
+    session['Global_Partner_req'] = Global_Partner_req
+    session['CISCO_Partner_req'] = CISCO_Partner_req
+    session['CITRIX_Partner_req'] = CITRIX_Partner_req
+    session['MS_Partner_req'] = MS_Partner_req
+    session['Dell_Partner_req'] = Dell_Partner_req
+    session['IBM_Partner_req'] = IBM_Partner_req
+    session['Oracle_Partner_req'] = Oracle_Partner_req
+    session['VM_Partner_req'] = VM_Partner_req
+    session['SAP_Partner_req'] = SAP_Partner_req
+    
+    
+#    try:
+#        dummy = session['req']
+#    except:
+#        session['req'] = 0
+#
+#    rule = request.url_rule
+
     
     if prod_req != 'Any':
         productFilter = getProductFilter(prod_req)
@@ -636,7 +824,111 @@ def mapview():
         if len(query)<5:
             query = query + str(roleFilter)
         else:
-            query = str(query) + ' and ' +  str(roleFilter)     
+            query = str(query) + ' and ' +  str(roleFilter)   
+            
+            
+    if level_req != 'Any' :
+        levelFilter = getlevelFilter(level_req)
+        if len(query)<5:
+            query = query + str(levelFilter)
+        else:
+            query = str(query) + ' and ' +  str(levelFilter) 
+
+    query = setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req,RH_Partner_req)
+        
+    if len(query) > 2:    
+        x= getPartnersLoc(query)
+    else: 
+        x= getPartnersLoc('') 
+    x= getPartnersLoc(query)
+    x= DataFrame(x)  
+    variable = []
+    variable.append([ 'Country' , 'Partners'  ])
+    for j in range(0,len(x.ix[:,:])):
+        variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])      
+    BarJson = getBarJson()
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,BarJson = BarJson)
+
+
+
+
+
+
+
+#@app.route('/mapview' , methods=['GET', 'POST'])
+@app.route('/tmapview' , methods=['GET', 'POST'])
+def tmapview():
+    
+    form = SearchForm(csrf_enabled=False)
+    query = ''
+    productFilter = ''
+    industryFilter = ''
+
+    prod_req = session['prod_req']
+    ind_req = session['ind_req']
+    region_req = session['region_req']
+    country_req = session['country_req']
+    name_req = session['name_req']
+    role_req = session['role_req']
+    level_req = session['level_req']
+    RH_Partner_req = session['RH_Partner_req']
+    Global_Partner_req = session['Global_Partner_req']
+    CISCO_Partner_req = session['CISCO_Partner_req']
+    CITRIX_Partner_req = session['CITRIX_Partner_req']
+    MS_Partner_req = session['MS_Partner_req']
+    Dell_Partner_req = session['Dell_Partner_req']
+    IBM_Partner_req = session['IBM_Partner_req']
+    Oracle_Partner_req = session['Oracle_Partner_req']
+    VM_Partner_req = session['VM_Partner_req']
+    SAP_Partner_req = session['SAP_Partner_req']
+#    
+#    try:
+#        dummy = session['req']
+#    except:
+#        session['req'] = 0
+#
+#    rule = request.url_rule
+
+    
+    if prod_req != 'Any':
+        productFilter = getProductFilter(prod_req)
+        query = query + str(productFilter)
+    if ind_req != 'Any' :
+        industryFilter = getIndustryFilter(ind_req)
+        if len(query)<5:
+            query = query + str(industryFilter)
+        else:
+            query = str(query) + ' and ' +  str(industryFilter)
+    if region_req != 'Any' :
+        if len(query)<5:
+            query = query + ' GeoRegion = "' + str(region_req) + '"'
+        else:
+            query = str(query) + ' and ' +  ' GeoRegion = "' + str(region_req) + '"'
+    if country_req != 'Any' :
+        if len(query)<5:
+            query = query + ' GeoCountry = "' + str(country_req) + '"'
+        else:
+            query = str(query) + ' and ' +  ' GeoCountry = "' + str(country_req) + '"'
+    if name_req != '' :
+        if len(query)<5:
+            query = query + ' Name like "%' + str(name_req) + '%" '
+        else:
+            query = str(query) + ' and ' +   ' Name like "%' + str(name_req) + '%" '        
+    if role_req != 'Any' :
+        roleFilter = getRoleFilter(role_req)
+        if len(query)<5:
+            query = query + str(roleFilter)
+        else:
+            query = str(query) + ' and ' +  str(roleFilter)   
+            
+            
+    if level_req != 'Any' :
+        levelFilter = getlevelFilter(level_req)
+        if len(query)<5:
+            query = query + str(levelFilter)
+        else:
+            query = str(query) + ' and ' +  str(levelFilter) 
+
     query = setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req,RH_Partner_req)
         
     if len(query) > 2:    

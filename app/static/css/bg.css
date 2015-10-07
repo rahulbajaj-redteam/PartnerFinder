@@ -30,6 +30,13 @@ body {
   padding-right: 15px;
 }
 
+
+#csvdata {
+    display: none;
+}
+
+
+
 .center-container {
   height:100%;
   display: table;

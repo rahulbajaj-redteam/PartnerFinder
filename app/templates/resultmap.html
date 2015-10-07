@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>MPartner Finder | Red Hat</title>
+<title>Partner Finder | Red Hat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -291,10 +291,44 @@
 
 </form>
 
+
+<pre id="csvdata">
+{{bubble|safe}}
+</pre>
+
+
+
 <table align = "center">
 <tr>
 <td>
+</td>
+<td>
          <div id="chart_div" style="width: 1200px ; height: 500px;"></div><br/><br/>
+
+</td>
+<td>
+
+<div id="chartContainer">
+
+    <script src="/static/js/d3.v3.4.8.js"></script>
+  <script src="/static/js/dimple.v2.1.6.js"></script>
+
+  <script type="text/javascript">      var svg = dimple.newSvg("#chartContainer", 590, 400);
+      JSONdata = {{bubble|safe}};   
+      
+     
+  
+          var myChart = new dimple.chart(svg, JSONdata);
+          myChart.setBounds(80, 30, 480, 330)
+          myChart.addMeasureAxis("x", "NumberOfPartners");
+          myChart.addCategoryAxis("y", ["AvgRating", "GeoCountry"]);
+          myChart.addMeasureAxis("z", "NOA");
+          myChart.addSeries("GeoCountry", dimple.plot.bubble);
+          myChart.addLegend(60, 10, 510, 20, "right");
+          myChart.draw();
+  </script>
+</div>
+
 
 </td>
 </tr>

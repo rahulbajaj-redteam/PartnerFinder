@@ -24,6 +24,7 @@ from py2neo import Graph
 from py2neo import authenticate
 import collections
 from datetime import date
+import StringIO
 
 
 authenticate("localhost:7474", "neo4j", "password")
@@ -846,12 +847,31 @@ def mapview():
     variable.append([ 'Country' , 'Partners'  ])
     for j in range(0,len(x.ix[:,:])):
         variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])      
-    BarJson = getBarJson()
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,BarJson = BarJson)
+    BarJson = getBubbleJson(country_req,)
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson)
 
 
 
-
+@app.route('/cjson' , methods=['GET', 'POST'])
+def getBubbleJson():
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT GeoCountry,Count(*) AS NumberOfPartners,avg(Avg_Level) as AvgRating , Avg_Level*Count(*) AS NOA from rhpartners.ptt group by GeoCountry Order by 2 desc LIMIT 5;"
+    data = pd.read_sql(query,cnx) 
+    cnx.close()
+    #return data
+    if data is None:
+        return ''
+    else:
+#        s = StringIO.StringIO()
+        
+  #      return data.to_csv()
+        d1 = data.to_json()
+        d1 = data.to_json(orient='records')
+        #d1 = json.dumps(data)
+        return d1
+      #  return  data.to_csv(index=False,sep=',')
+        
+        
 
 
 
@@ -947,17 +967,6 @@ def tmapview():
 
 
 
-def getBarJson():
-    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT GeoCountry,Count(*) AS Count  from rhpartners.ptt group by GeoCountry Order by 2 desc LIMIT 5;"
-    data = pd.read_sql(query,cnx) 
-    cnx.close()
-    if data is None:
-        return ''
-    else:
-        d1 = data.to_json()
-        d1 = data.to_json(orient='records')
-        return d1
 
 
 

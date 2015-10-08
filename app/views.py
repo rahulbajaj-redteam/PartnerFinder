@@ -25,7 +25,9 @@ from py2neo import authenticate
 import collections
 from datetime import date
 import StringIO
-
+import math
+import csv
+import ast
 
 authenticate("localhost:7474", "neo4j", "password")
 graph = Graph("http://localhost:7474/db/data/")
@@ -414,9 +416,6 @@ def getCompAssociationDetails(id):
     
     htmlText = ''
     
-
-
-
 
 
     if data['Citrix_Partner_ID'].iloc[0] != '' :
@@ -847,30 +846,111 @@ def mapview():
     variable.append([ 'Country' , 'Partners'  ])
     for j in range(0,len(x.ix[:,:])):
         variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])      
-    BarJson = getBubbleJson(country_req,)
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson)
+    BarJson = getBubbleJson(country_req)
+    ORingJson = getORingJson(country_req)
+   # ORingJson = json.dumps(ORingJson)
+    IRingJson = getIRingJson(country_req)
+    #IRingJson = json.dumps(IRingJson)
+    #IRingJson = csv.writer(IRingJson, quoting=csv.QUOTE_ALL)
+#    columns = ['product']
+#    IRingJson = pd.DataFrame(ORingJson ,columns=columns)
+#    
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson)
 
 
 
-@app.route('/cjson' , methods=['GET', 'POST'])
-def getBubbleJson():
+
+
+
+def getBubbleJson(country_req):
+    query = 'SELECT GeoCountry,Count(*) AS NumberOfPartners,avg(Avg_Level) as AvgRating , Avg_Level*Count(*) AS NOA from rhpartners.ptt '
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT GeoCountry,Count(*) AS NumberOfPartners,avg(Avg_Level) as AvgRating , Avg_Level*Count(*) AS NOA from rhpartners.ptt group by GeoCountry Order by 2 desc LIMIT 5;"
+    if country_req != 'Any' :
+        query = query + ' where GeoCountry = "' + str(country_req) + '"'
+        
+    query = query + " group by GeoCountry Order by 2 desc LIMIT 7;"
     data = pd.read_sql(query,cnx) 
     cnx.close()
-    #return data
     if data is None:
         return ''
     else:
-#        s = StringIO.StringIO()
-        
-  #      return data.to_csv()
         d1 = data.to_json()
         d1 = data.to_json(orient='records')
-        #d1 = json.dumps(data)
         return d1
-      #  return  data.to_csv(index=False,sep=',')
+      
         
+
+
+
+
+
+
+def getIRingJson(country_req):
+    query = 'SELECT Prod_Type,Count from rhpartners.ptt_partner_prod where GeoCountry like "SPAIN";'
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+#    if country_req != 'Any' :
+#        query = query + ' where GeoCountry = "' + str(country_req) + '"'
+#        
+#    query = query + " ;"
+    data = pd.read_sql(query,cnx) 
+    cnx.close()
+    if data is None:
+        return ''
+    else:
+        d1 = data.to_json()
+        d1 = data.to_json(orient='records')
+        return d1
+        
+        
+        
+        
+        
+        
+        
+
+def getORingJson(country_req):
+    query = 'SELECT sum(Prod_Platforms) as Prod_Platforms,sum(Prod_Virtualization) as Prod_Virtualization,sum(Prod_Cloud) as Prod_Cloud ,sum(Prod_Storage) as Prod_Storage ,sum(Prod_Middleware) as Prod_Middleware,sum(Prod_Analytics) as Prod_Analytics,sum(Prod_IoT) as Prod_IoT,sum(Prod_DataManagement) as Prod_DataManagement,sum(Prod_Mobility) as Prod_Mobility,sum(Prod_SCM) as Prod_SCM, sum(Prod_CRM) as Prod_CRM,sum(Prod_Security) as Prod_Security, sum(Prod_Platforms)+sum(Prod_Virtualization)+sum(Prod_Cloud)+sum(Prod_Storage)+sum(Prod_Middleware)+sum(Prod_Analytics)+sum(Prod_IoT)+sum(Prod_DataManagement)+sum(Prod_Mobility)+sum(Prod_SCM)+ sum(Prod_CRM)+sum(Prod_Security) as total from rhpartners.ptt ;'
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    if country_req != 'Any' :
+        query = query + ' where GeoCountry = "' + str(country_req) + '"'        
+    query = query + " ;"
+    data = pd.read_sql(query,cnx) 
+    cnx.close()
+    if data is None:
+        return ''
+    else:
+        
+        resultset = []
+        #resultset.extend([data[0]*100/data['sum'],data[1]*100/data['sum'],data[2]*100/data['sum'],data[3]*100/data['sum'],data[4]*100/data['sum'],data[5]*100/data['sum'],data[6]*100/data['sum'],data[7]*100/data['sum'],data[8]*100/data['sum'],data[9]*100/data['sum'],data[10]*100/data['sum'],data[11]*100/data['sum'],data[12]*100/data['sum']])
+        item = 'Product,Count'
+        resultset.append(item)
+        item = 'Platforms,' + str(math.floor(round(int(data['Prod_Platforms'].iloc[0])*100/data['total'].iloc[0],2))) 
+        resultset.append(item)
+        item = 'Virtualization,' + str(math.floor(round(int(data['Prod_Virtualization'].iloc[0])*100/data['total'].iloc[0])))
+        resultset.append(item)
+        item = 'Cloud,' + str(math.floor(round(int(data['Prod_Cloud'].iloc[0])*100/data['total'].iloc[0])))
+        resultset.append(item)
+        item = 'Storage,' + str(math.floor(round(  int(data['Prod_Storage'].iloc[0])*100/data['total'].iloc[0])))
+        resultset.append(item)
+        item = 'Middleware,' + str(math.floor(round(int(data['Prod_Middleware'].iloc[0])*100/data['total'].iloc[0])))
+        resultset.append(item)
+        item = 'Analytics,' + str(math.floor(round(int(data['Prod_Analytics'].iloc[0])*100/data['total'].iloc[0]))) 
+        resultset.append(item)
+        item = 'IoT,' + str(math.floor(round(int(data['Prod_IoT'].iloc[0])*100/data['total'].iloc[0])))
+        #resultset.append( item)
+        #resultset.append( math.floor(round(int(data['Prod_DataManagement'].iloc[0])*100/data['total'].iloc[0])))
+        #resultset.append( math.floor(round(int(data['Prod_Mobility'].iloc[0])*100/data['total'].iloc[0])))
+        #resultset.append( math.floor(round(int(data['Prod_SCM'].iloc[0])*100/data['total'].iloc[0])))
+        #resultset.append( math.floor(round(int(data['Prod_CRM'].iloc[0])*100/data['total'].iloc[0])))
+        #resultset.append( math.floor(round(int(data['Prod_Security'].iloc[0])*100/data['total'].iloc[0])))
+        resultset = pd.DataFrame(resultset)
+        d1 = data.to_json()
+        d1 = data.to_json(orient='records')
+        
+        return resultset
+
+
+
         
 
 

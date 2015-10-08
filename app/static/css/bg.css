@@ -31,6 +31,15 @@ body {
 }
 
 
+#mapContainer svg {
+    display:block;
+    margin:0 auto;
+}
+#mapContainer path {
+  fill:#DDD;
+  stroke:#FFF;
+}
+
 #csvdata {
     display: none;
 }

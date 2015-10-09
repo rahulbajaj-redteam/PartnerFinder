@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>Partner Finder | Red Hat</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +7,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="/static/css/bg.css">
+<link rel="stylesheet" href="/static/css/normalize.css">
   <meta charset="utf-8">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
@@ -19,21 +20,56 @@
   
     google.load('visualization', '1', { 'packages': ['geochart'] });
     google.setOnLoadCallback(drawMap);
+
+
+
     function drawMap() {
     var data = google.visualization.arrayToDataTable({{dfmap|safe}});
     var options = {};
     options['resolution'] = 'countries';
-    options['width'] = '100%';
+    options['width'] = '50%';
     options['colorAxis'] = {minValue: 0,  colors: ['#ddeef8', '#a3d6fb','#0078c0', '#ffe04e', '#f8931f', '#d54215',]}
     var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
     chart.draw(data, options);
+    drawBubbleChart();
+    drawRingChart();
   };
 
+
+    function drawBubbleChart()
+        {
+             var svg = dimple.newSvg("#bubblechart_div");
+              svg.attr("x", "8px")
+              .attr("y", "1px")
+              .attr("width", "100%")
+              .attr("height", "100%")
+              JSONdata = {{bubble|safe}};                
+              var myChart = new dimple.chart(svg, JSONdata);
+              myChart.addMeasureAxis("x", "NOA");
+              myChart.addCategoryAxis("y", ["AvgRating", "GeoCountry"]);
+              myChart.addMeasureAxis("z", "NOA");
+              myChart.addSeries("GeoCountry", dimple.plot.bubble);
+              myChart.addLegend(90, 0, 510, 50, "right");
+              myChart.draw();
+        }
+
+    function drawRingChart()
+        {
+            var svg = dimple.newSvg("#ringchart_div");
+              svg.attr("x", "8px")
+              .attr("y", "8px")
+              .attr("width", "90%")
+              .attr("height", "90%")
+              JSONdata = {{IRingJson|safe}};                
+              var myChart = new dimple.chart(svg, JSONdata);            
+              myChart.addMeasureAxis("p", "Count");
+              var ring = myChart.addSeries("Prod_Type", dimple.plot.pie);
+              ring.innerRadius = "80%";
+              myChart.addLegend(500, 20, 90, 300, "left");
+              myChart.draw();
+        }
+
   </script>
-
-                                        
-
-
 
 </head>
 
@@ -43,23 +79,23 @@
 <div style="background-color:white;">
     <div class="container-fluid">
          <div class="row">
-            <div class="col-sm-4" >
-                    <img src="static/img/6aeadffdf8c17100308c8188f59090ee.iix.png" height="45" width="142"  >
+                            <div class="col-sm-4" >
+                                    <img src="static/img/6aeadffdf8c17100308c8188f59090ee.iix.png" height="45" width="142"  >
+                            </div>
+                            <div class="col-sm-4" >
+                            </div>
+                            <div class="col-sm-4" >
+                                
+                               <ul class="nav navbar-nav navbar-right">
+                                    <li class="active">
+                                            <a href="/search">Tabular View<span class="sr-only">(current)</span></a>
+                                    </li>       
+                               </ul>
+                            </div>
             </div>
-            <div class="col-sm-4" >
-            </div>
-            <div class="col-sm-4" >
-                
-               <ul class="nav navbar-nav navbar-right">
-                    <li class="active">
-                            <a href="/search">Tabular View<span class="sr-only">(current)</span></a>
-                    </li>       
-               </ul>
-            </div>
-    </div>
 </div>
 
-
+</div>
 
 
 
@@ -67,200 +103,198 @@
 <form name='partner_name' action=""  method='post'>    
 {{ form.hidden_tag() }}
 <div class="form-group">
-<div class="container-fluid  bg-three">
-    <div class="row">
-        <div class="col-sm-4" >
-                <font color = "white"><label>Product, Service or Speciality:</label> </font><br>
-                  {{ form.prod_req }}
-        </div>
-        <div class="col-sm-4">                          
-                <font color = "white"><label>Industry</label> </font><br>
-                <div  style="max-width:70%;min-width:70%;">
-                {{ form.ind_req }}
-                </div>
-   </div>
-        <div class="col-sm-4">
-            <font color = "white"><label>Role</label> </font><br>
-            <div  style="max-width:70%;min-width:70%;">
-             {{ form.role_req }}
-            </div>
-    		    <br/> 
-        </div>
-  </div>
+    <div class="container-fluid  bg-three">
+                <div class="row">
+                            <div class="col-sm-4" >
+                                    <font color = "white"><label>Product, Service or Speciality:</label> </font><br>
+                                      {{ form.prod_req }}
+                            </div>
+                            <div class="col-sm-4">                          
+                                    <font color = "white"><label>Industry</label> </font><br>
+                                    <div  style="max-width:70%;min-width:70%;">
+                                                {{ form.ind_req }}
+                                    </div>
+                           </div>
+                            <div class="col-sm-4">
+                                        <font color = "white"><label>Role</label> </font><br>
+                                        <div  style="max-width:70%;min-width:70%;">
+                                         {{ form.role_req }}
+                                        </div>
+                                		  <br/> 
+                            </div>
+                   </div>
+
+
+                  <div class="row">
+                            <div class="col-sm-4">
+                                    <font color = "white"><label> Partnership Level</label> </font><br>
+                                    <div  style="max-width:70%;min-width:70%;">
+                                    {{ form.level_req }}
+                                    </div>
+                            </div>
+                            <div class="col-sm-4" >
+                                     <font color = "white"><label>Region </label> </font><br>
+                                        {{ form.region_req }}
+                        
+                            </div>
+                            <div class="col-sm-4">
+                                    <font color = "white"><label>Country</label> </font><br>
+                                          {{ form.country_req }}
+                                 <br/><br/>
+                            </div>
+                  </div>
+
+
+             <div class="row">
+                            <div class="col-sm-4">        
+                                    <font color = "white"><label style="max-width:70%;min-width:70%;">Partner Name</label> </font><br>
+                                    {{ form.name_req }}
+                                        <br/> <br/>
+                            </div>
+                            <div class="col-sm-4"><font color = "white">
+                            <font color = "white"><label style="max-width:70%;min-width:70%;">Red Hat Partner</label> </font><br>
+                            {{ form.RH_Partner_req }}</font>
+                            </div>
+                            <div class="col-sm-4" >
+                            <font color = "white"><label>Global Partner</label> </font><br>
+                            {{ form.Global_Partner_req }}
+                            </div>
+              </div>
 
 
   <div class="row">
-    <div class="col-sm-4">
-            <font color = "white"><label> Partnership Level</label> </font><br>
-            <div  style="max-width:70%;min-width:70%;">
-            {{ form.level_req }}
+            <div class="col-sm-6">   
+            <table>
+           <tr>
+             <td><input name = "CISCOPartner"  id = "CISCOPartner"  value="1" data-toggle="toggle" data-on="CiscoPartner" data-off="Cisco"  type="checkbox"></td>
+        
+                {% block Cisco %}
+                    {% if Cisco_dummy %}
+                        {{(Cisco_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#CISCOPartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock Cisco %}
+        
+                <td><input  id = "CITRIXPartner" name = "CITRIXPartner"  value="1" data-toggle="toggle" data-on="Citrix Partner" data-off="Citrix"  type="checkbox"></td>
+        
+                {% block Citrix %}
+                    {% if CITRIX_dummy %}
+                        {{(CITRIX_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#CITRIXPartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock Citrix %}
+        
+                <td><input name = "MSPartner"  id = "MSPartner" value="1" data-toggle="toggle" data-on="Microsoft Partner    " data-off="Microsoft"  type="checkbox"></td>
+                {% block MS %}
+                    {% if MS_dummy %}
+                        {{(MS_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#MSPartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock MS %}
+        
+                <td><input  name = "DellPartner"  id = "DellPartner"  value="1" data-toggle="toggle" data-on="Dell Partner  " data-off="Dell"  type="checkbox"></td>
+                {% block Dell %}
+                    {% if Dell_dummy %}
+                        {{(Dell_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#DellPartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock Dell %}
+        
+                <td><input  name = "IBMPartner"  id = "IBMPartner"  value="1" data-toggle="toggle" data-on="IBM Partner   " data-off="IBM"  type="checkbox"></td>        
+                {% block IBM %}
+                    {% if IBM_dummy %}
+                        {{(IBM_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#IBMPartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock IBM %}
+        
+                <td><input name = "OraclePartner" id = "OraclePartner"  value="1"  data-toggle="toggle" data-on="Oracle Partner" data-off="Oracle"  type="checkbox"></td>        
+                {% block Oracle %}
+                    {% if Oracle_dummy %}
+                        {{(Oracle_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#OraclePartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock Oracle %}
+        
+                <td><input  name = "VMPartner" id = "VMPartner"  value="1" data-toggle="toggle" data-on="VMWare Partner" data-off="VMWare"  type="checkbox"></td>
+                {% block VM %}
+                    {% if VM_dummy %}
+                        {{(VM_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#VMPartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock VM %}
+        
+                <td><input id = "SAPPartner" name = "SAPPartner" value="1" data-toggle="toggle" data-on="   SAP Partner   " data-off="   SAP   "  type="checkbox"></td>
+                {% block SAP %}
+                    {% if SAP_dummy %}
+                        {{(SAP_dummy[0])}}
+                        <script>
+                            $(function() {
+                                    $('#SAPPartner').bootstrapToggle('on');
+                                          }) 
+                       </script>
+                    {% else %}
+                    {% endif %}
+                {% endblock SAP %}
+        
+                <td> </td>
+            </tr>
+            </table>
+                     
+            </div> 
+
+
+            <div class="col-sm-4">                     
+               
             </div>
-    </div>
-    <div class="col-sm-4" >
-             <font color = "white"><label>Region </label> </font><br>
-                {{ form.region_req }}
-
-    </div>
-    <div class="col-sm-4">
-            <font color = "white"><label>Country</label> </font><br>
-                  {{ form.country_req }}
-         <br/><br/>
-    </div>
-  </div>
-
-
- <div class="row">
-    <div class="col-sm-4">        
-            <font color = "white"><label style="max-width:70%;min-width:70%;">Partner Name</label> </font><br>
-            {{ form.name_req }}
-    <br/> <br/>
-    </div>
-    <div class="col-sm-4"><font color = "white">
-    <font color = "white"><label style="max-width:70%;min-width:70%;">Red Hat Partner</label> </font><br>
-    {{ form.RH_Partner_req }}</font>
-    </div>
-    <div class="col-sm-4" >
-    <font color = "white"><label>Global Partner</label> </font><br>
-    {{ form.Global_Partner_req }}
-    </div>
-  </div>
-
-
-  <div class="row">
-    <div class="col-sm-6">   
-    <table>
-   <tr>
-     <td><input name = "CISCOPartner"  id = "CISCOPartner"  value="1" data-toggle="toggle" data-on="CiscoPartner" data-off="Cisco"  type="checkbox"></td>
-
-        {% block Cisco %}
-            {% if Cisco_dummy %}
-                {{(Cisco_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#CISCOPartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock Cisco %}
-
-        <td><input  id = "CITRIXPartner" name = "CITRIXPartner"  value="1" data-toggle="toggle" data-on="Citrix Partner" data-off="Citrix"  type="checkbox"></td>
-
-        {% block Citrix %}
-            {% if CITRIX_dummy %}
-                {{(CITRIX_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#CITRIXPartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock Citrix %}
-
-        <td><input name = "MSPartner"  id = "MSPartner" value="1" data-toggle="toggle" data-on="Microsoft Partner    " data-off="Microsoft"  type="checkbox"></td>
-        {% block MS %}
-            {% if MS_dummy %}
-                {{(MS_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#MSPartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock MS %}
-
-        <td><input  name = "DellPartner"  id = "DellPartner"  value="1" data-toggle="toggle" data-on="Dell Partner  " data-off="Dell"  type="checkbox"></td>
-        {% block Dell %}
-            {% if Dell_dummy %}
-                {{(Dell_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#DellPartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock Dell %}
-
-        <td><input  name = "IBMPartner"  id = "IBMPartner"  value="1" data-toggle="toggle" data-on="IBM Partner   " data-off="IBM"  type="checkbox"></td>        
-        {% block IBM %}
-            {% if IBM_dummy %}
-                {{(IBM_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#IBMPartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock IBM %}
-
-        <td><input name = "OraclePartner" id = "OraclePartner"  value="1"  data-toggle="toggle" data-on="Oracle Partner" data-off="Oracle"  type="checkbox"></td>        
-        {% block Oracle %}
-            {% if Oracle_dummy %}
-                {{(Oracle_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#OraclePartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock Oracle %}
-
-        <td><input  name = "VMPartner" id = "VMPartner"  value="1" data-toggle="toggle" data-on="VMWare Partner" data-off="VMWare"  type="checkbox"></td>
-        {% block VM %}
-            {% if VM_dummy %}
-                {{(VM_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#VMPartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock VM %}
-
-        <td><input id = "SAPPartner" name = "SAPPartner" value="1" data-toggle="toggle" data-on="   SAP Partner   " data-off="   SAP   "  type="checkbox"></td>
-        {% block SAP %}
-            {% if SAP_dummy %}
-                {{(SAP_dummy[0])}}
-                <script>
-                    $(function() {
-                            $('#SAPPartner').bootstrapToggle('on');
-                                  }) 
-               </script>
-            {% else %}
-            {% endif %}
-        {% endblock SAP %}
-
-        <td> </td>
-    </tr>
-    </table>
+            <div class="col-sm-2">  
+                     
+                       <button type= "submit" name ="search" id="search" class="btn btn-success" >Search</button> 
+                <button type="button" name ="reset" id= "reset" class="btn btn-warning">Reset</button> 
+              <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span> 
              
-    </div> 
-
-
-    <div class="col-sm-4">                     
-       
-    </div>
-    <div class="col-sm-2">  
-             
-               <button type= "submit" name ="search" id="search" class="btn btn-success" >Search</button> 
-        <button type="button" name ="reset" id= "reset" class="btn btn-warning">Reset</button> 
-      <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span> 
-     
-         <script type="text/javascript">
-                document.getElementById("reset").onclick = function () {
-                location.href = "/mapview";
-                };
-        </script>
-    </div>
+                 <script type="text/javascript">
+                        document.getElementById("reset").onclick = function () {
+                        location.href = "/mapview";
+                        };
+                </script>
+            </div>
   </div>
-
-
 
  
 <br/>
@@ -269,65 +303,7 @@
 
 </form>
 
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-6 col-md-6">
-                    <div class="row" >
-                          <div id = "chartContainer"></div>
-
-                                    <script type="text/javascript">      
-                                
-                                      var svg = dimple.newSvg("#chartContainer");
-                                      svg.attr("x", "8px")
-                                      .attr("y", "8px")
-                                      .attr("width", "100%")
-                                      .attr("height", "100%")
-                                      JSONdata = {{bubble|safe}};                
-                                      var myChart = new dimple.chart(svg, JSONdata);
-                                      myChart.addMeasureAxis("x", "NumberOfPartners");
-                                      myChart.addCategoryAxis("y", ["AvgRating", "GeoCountry"]);
-                                      myChart.addMeasureAxis("z", "NOA");
-                                      myChart.addSeries("GeoCountry", dimple.plot.bubble);
-                                      myChart.addLegend(60, 10, 510, 20, "right");
-                                      myChart.draw();
-                                
-                                      </script>
-                               </div>
-                    <div class="row">
-                          <div id="ringContainer">                                </div>
-                                              <script type="text/javascript">      
-                                                    var svg = dimple.newSvg("#ringContainer");
-                                                          svg.attr("x", "8px")
-                                                          .attr("y", "8px")
-                                                          .attr("width", "100%")
-                                                          .attr("height", "100%")
-
-                                                      JSONdata = {{IRingJson|safe}};                
-                                                      var myChart = new dimple.chart(svg, JSONdata);
-                                                    
-                                                      myChart.addMeasureAxis("p", "Count");
-                                                  var ring = myChart.addSeries("Prod_Type", dimple.plot.pie);
-                                                  ring.innerRadius = "80%";
-                                                  myChart.addLegend(500, 20, 90, 300, "left");
-                                                  myChart.draw();
-                                              </script>
-
-      
-                            </div>
-                    </DIV>
-            <div class="col-sm-6 col-md-6">
-                       <div id="chart_div"></div>      
-            </div>
-    </div>
-</div>
-
-
-
-
-
-
-
+<div id="chart_div" style="width: 1200px; height: 400px;margin:0 auto;"></div>                        
 </body>
 
 

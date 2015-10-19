@@ -84,7 +84,7 @@ table {
 
     </div>
 
-<table align="center" style="width: 75%; height:85%;" class="container-fluid  bg-lgrey" >
+<table align="center" style="width: 75%;" class="container-fluid  bg-lgrey" >
     <tr>
     <td>
     </td>
@@ -97,12 +97,44 @@ table {
             <h3>&nbsp;{{name | safe}} 
                      {% if RHP == '1' %} 
                                  <img src="../static/img/RH.gif" height="30" width="30" title="Red Hat Partner" >  
+                                
                     {% endif %} 
 
 
                      {% if Global_Partner_Flag == '1' %} 
                                  <img src="../static/img/global.gif" height="40" width="40" title="Global Partner" >  
                     {% endif %} 
+
+                
+
+                     {% if RHP == '1' %} 
+                                  <button type="button" name ="NotRHP" id= "NotRHP" class="btn btn-funwarning">Not a Red Hat Partner</button> 
+                                    <script type="text/javascript">
+                        
+                        
+                        
+                                            document.getElementById("NotRHP").onclick = function () {
+                                            location.href = "/ToggleRH0/".concat({{id|safe}});
+                                            };
+                        
+                        
+                                    </script>          
+
+
+                     {%  else  %}
+                                 <button type="button" name ="RHP" id= "RHP" class="btn btn-funwarning">Is a Red Hat Partner</button>  
+                                    <script type="text/javascript">
+                        
+                        
+                                            document.getElementById("RHP").onclick = function () {
+                                            location.href = "/ToggleRH1/".concat({{id|safe}}) ;
+                                            };
+                        
+                        
+                                    </script>          
+                    {% endif %} 
+ 
+
             </h3>
            
 
@@ -138,14 +170,24 @@ table {
             {% endif %}
 
     </td>
-    <td style="width: 30%;">
-
-            <div id="accordion">            
-            {% block content %}
-              {{Comp | safe}}  {% endblock %}            
-            </div>
-    </td>
+   
    </tr>
 </table>
+
+
+
+<table align="center" style="width: 75%;" class="container-fluid  bg-lgrey beta">
+    <tr>
+        <th bgcolor="#FF0000"></td>
+        <th bgcolor="#FF0000">Products/Services</td>
+        <th bgcolor="#FF0000">Specialization</td>
+        <th bgcolor="#FF0000">Certification</td>
+        <th bgcolor="#FF0000">Authorizations</td>
+        <th bgcolor="#FF0000">Partnership Level</td>
+    </tr>
+    {{TabOutput|safe}}
+</table>
+
+
 </body>
 </html>

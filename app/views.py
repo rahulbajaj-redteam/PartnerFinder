@@ -315,11 +315,17 @@ def search():
                                
 
 
+@app.route('/ToggleRH1/<id>' , methods=['GET', 'POST'])
+def ToggleRH1(id):    
 
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    cursor = cnx.cursor()
+    update_query = "update RHPartners.ptt set RH_Partner_Match_Flag = 1 , RH_Partner_ID = 'CorrectedByUser',RH_Partner =1  where id = CONCAT('', %s, '');"
+    cursor.execute(update_query,(str(id),))
+    cnx.commit()              
 
-@app.route('/PDetails/<id>' , methods=['GET', 'POST'])
-def PDetails(id):
     df = getPartnerDetail(id)
+    TabOutput = getAssociationDetails(id)
     Comp   = getCompAssociationDetails(id)
     Attr = getPAttributes(id)
     Industry = ''
@@ -378,8 +384,292 @@ def PDetails(id):
         
     Overview = str(df['Overview'].iloc[0])
     Overview = str(Overview)[0:Overview.find("', u")]
-    return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]), Comp = str(Comp),Industry = Industry , Business_Process_Outsourcing_Partner_Flag=Business_Process_Outsourcing_Partner_Flag,Global_Partner_Flag=str(Attr['Global_Partner'].iloc[0]), Service_Partner_Flag=Service_Partner_Flag )
+    ToggleBtn = ''
+    if str(df['RH_Partner'].iloc[0]) == '1':
+        ToggleBtn = str('<a href = /ToggleRH0/') + str(id) + str('  target = "_blank" >Not a Red Hat Partner</a>')
+    else:
+        ToggleBtn = str('<a href = /ToggleRH1/') + str(id) + str('  target = "_blank" >Its a Red Hat Partner</a>')
+    return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]), Comp = str(Comp),Industry = Industry , Business_Process_Outsourcing_Partner_Flag=Business_Process_Outsourcing_Partner_Flag,Global_Partner_Flag=str(Attr['Global_Partner'].iloc[0]), Service_Partner_Flag=Service_Partner_Flag,TabOutput=str(TabOutput), ToggleBtn = str(ToggleBtn),id=str(id) )
+
+
+
+
+
+@app.route('/ToggleRH0/<id>' , methods=['GET', 'POST'])
+def ToggleRH0(id):
+    try:
+        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+        cursor = cnx.cursor()
+        update_query = "update RHPartners.ptt set RH_Partner_Match_Flag = 0 , RH_Partner =0  where id = CONCAT('', %s, '')"
+        cursor.execute(update_query,(str(id),))
+        cnx.commit()
+
+    except Exception:
+        pass
+    finally:
+        df = getPartnerDetail(id)
+        TabOutput = getAssociationDetails(id)
+        Comp   = getCompAssociationDetails(id)
+        Attr = getPAttributes(id)
+        Industry = ''
+        Business_Process_Outsourcing_Partner_Flag =''
+        Global_Partner_Flag=''
+        Service_Partner_Flag=''
+        
+        Service_Partner_Flag = str(Attr['Services_Partner'].iloc[0])
+        Global_Partner_Flag = str(Attr['Global_Partner'].iloc[0])
+        Business_Process_Outsourcing_Partner_Flag = str(Attr['Business_Process_Outsourcing_Partner'].iloc[0])
+        Industry = ''
+        if int(Attr['Ind_Banking'].iloc[0]) > 0:
+            Industry = Industry + 'Banking'
+        elif Attr['Ind_Computer_Services'].iloc[0] >0:
+            Industry = Industry + 'Computer Services'
+        elif Attr['Ind_Education'].iloc[0] >0:
+            Industry = Industry + 'Education'
+        elif Attr['Ind_Electronics'].iloc[0] >0:
+            Industry = Industry + 'Electronics'
+        elif Attr['Ind_Energy&Utilities'].iloc[0] >0:
+            Industry = Industry + 'Energy&Utilities'
+        elif Attr['Ind_FinancialMarkets'].iloc[0] >0:
+            Industry = Industry + 'Financial Markets'
+        elif Attr['Ind_Public_Sector'].iloc[0] >0:
+            Industry = Industry + 'Public Sector'
+        elif Attr['Ind_Healthcare'].iloc[0] >0:
+            Industry = Industry + 'Healthcare'
+        elif Attr['Ind_IndustrialProducts'].iloc[0] >0:
+            Industry = Industry + 'Industrial Products'
+        elif Attr['Ind_Insurance'].iloc[0] >0:
+            Industry = Industry + 'Insurance'
+        elif Attr['Ind_ProfessionalServices'].iloc[0] >0:
+            Industry = Industry + 'Professional Services'
+        elif Attr['Ind_Retail'].iloc[0] >0:
+            Industry = Industry + 'Retail'
+        elif Attr['Ind_Telecommunications'].iloc[0] >0:
+            Industry = Industry + 'Telecommunications'
+        elif Attr['Ind_WholesaleDistribution&Services'].iloc[0] >0:
+            Industry = Industry + 'Wholesale Distribution & Services'
+        elif Attr['Ind_Automotive'].iloc[0] >0:
+            Industry = Industry + 'Automotive'
+        elif Attr['Ind_ConsumerProducts'].iloc[0] >0:
+            Industry = Industry + 'Consumer Products'
+        elif Attr['Ind_Travel&Transportation'].iloc[0] >0:
+            Industry = Industry + 'Travel & Transportation'
+        elif Attr['Ind_Media&Entertainment'].iloc[0] >0:
+            Industry = Industry + 'Media & Entertainment'
+        elif Attr['Ind_Chemicals&Petroleum'].iloc[0] >0:
+            Industry = Industry + 'Chemicals & Petroleum'
+        elif Attr['Ind_LifeSciences'].iloc[0] >0:
+            Industry = Industry + 'Life Sciences'
+        elif Attr['Ind_Aerospace&Defense'].iloc[0] >0:
+            Industry = Industry + 'Aerospace & Defense'
+        elif Attr['Ind_EngineeringandConstruction'].iloc[0] >0:
+            Industry = Industry + 'Engineering and Construction'            
+            
+        Overview = str(df['Overview'].iloc[0])
+        Overview = str(Overview)[0:Overview.find("', u")]
+        ToggleBtn = ''
+        if str(df['RH_Partner'].iloc[0]) == '1':
+            ToggleBtn = str('<a href = /ToggleRH0/') + str(id) + str('  target = "_blank" >Not a Red Hat Partner</a>')
+        else:
+            ToggleBtn = str('<a href = /ToggleRH1/') + str(id) + str('  target = "_blank" >Its a Red Hat Partner</a>')
+        return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]), Comp = str(Comp),Industry = Industry , Business_Process_Outsourcing_Partner_Flag=Business_Process_Outsourcing_Partner_Flag,Global_Partner_Flag=str(Attr['Global_Partner'].iloc[0]), Service_Partner_Flag=Service_Partner_Flag,TabOutput=str(TabOutput), ToggleBtn = str(ToggleBtn),id=str(id) ,uq= str(update_query))
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/PDetails/<id>' , methods=['GET', 'POST'])
+def PDetails(id):
+    df = getPartnerDetail(id)
+    TabOutput = getAssociationDetails(id)
+    Comp   = getCompAssociationDetails(id)
+    Attr = getPAttributes(id)
+    Industry = ''
+    Business_Process_Outsourcing_Partner_Flag =''
+    Global_Partner_Flag=''
+    Service_Partner_Flag=''
     
+    Service_Partner_Flag = str(Attr['Services_Partner'].iloc[0])
+    Global_Partner_Flag = str(Attr['Global_Partner'].iloc[0])
+    Business_Process_Outsourcing_Partner_Flag = str(Attr['Business_Process_Outsourcing_Partner'].iloc[0])
+    Industry = ''
+    if int(Attr['Ind_Banking'].iloc[0]) > 0:
+        Industry = Industry + 'Banking'
+    elif Attr['Ind_Computer_Services'].iloc[0] >0:
+        Industry = Industry + 'Computer Services'
+    elif Attr['Ind_Education'].iloc[0] >0:
+        Industry = Industry + 'Education'
+    elif Attr['Ind_Electronics'].iloc[0] >0:
+        Industry = Industry + 'Electronics'
+    elif Attr['Ind_Energy&Utilities'].iloc[0] >0:
+        Industry = Industry + 'Energy&Utilities'
+    elif Attr['Ind_FinancialMarkets'].iloc[0] >0:
+        Industry = Industry + 'Financial Markets'
+    elif Attr['Ind_Public_Sector'].iloc[0] >0:
+        Industry = Industry + 'Public Sector'
+    elif Attr['Ind_Healthcare'].iloc[0] >0:
+        Industry = Industry + 'Healthcare'
+    elif Attr['Ind_IndustrialProducts'].iloc[0] >0:
+        Industry = Industry + 'Industrial Products'
+    elif Attr['Ind_Insurance'].iloc[0] >0:
+        Industry = Industry + 'Insurance'
+    elif Attr['Ind_ProfessionalServices'].iloc[0] >0:
+        Industry = Industry + 'Professional Services'
+    elif Attr['Ind_Retail'].iloc[0] >0:
+        Industry = Industry + 'Retail'
+    elif Attr['Ind_Telecommunications'].iloc[0] >0:
+        Industry = Industry + 'Telecommunications'
+    elif Attr['Ind_WholesaleDistribution&Services'].iloc[0] >0:
+        Industry = Industry + 'Wholesale Distribution & Services'
+    elif Attr['Ind_Automotive'].iloc[0] >0:
+        Industry = Industry + 'Automotive'
+    elif Attr['Ind_ConsumerProducts'].iloc[0] >0:
+        Industry = Industry + 'Consumer Products'
+    elif Attr['Ind_Travel&Transportation'].iloc[0] >0:
+        Industry = Industry + 'Travel & Transportation'
+    elif Attr['Ind_Media&Entertainment'].iloc[0] >0:
+        Industry = Industry + 'Media & Entertainment'
+    elif Attr['Ind_Chemicals&Petroleum'].iloc[0] >0:
+        Industry = Industry + 'Chemicals & Petroleum'
+    elif Attr['Ind_LifeSciences'].iloc[0] >0:
+        Industry = Industry + 'Life Sciences'
+    elif Attr['Ind_Aerospace&Defense'].iloc[0] >0:
+        Industry = Industry + 'Aerospace & Defense'
+    elif Attr['Ind_EngineeringandConstruction'].iloc[0] >0:
+        Industry = Industry + 'Engineering and Construction'            
+        
+    Overview = str(df['Overview'].iloc[0])
+    Overview = str(Overview)[0:Overview.find("', u")]
+    ToggleBtn = ''
+    if str(df['RH_Partner'].iloc[0]) == '1':
+        ToggleBtn = str('<a href = /ToggleRH0/') + str(id) + str('  target = "_blank" >Not a Red Hat Partner</a>')
+    else:
+        ToggleBtn = str('<a href = /ToggleRH1/') + str(id) + str('  target = "_blank" >Its a Red Hat Partner</a>')
+    return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]), Comp = str(Comp),Industry = Industry , Business_Process_Outsourcing_Partner_Flag=Business_Process_Outsourcing_Partner_Flag,Global_Partner_Flag=str(Attr['Global_Partner'].iloc[0]), Service_Partner_Flag=Service_Partner_Flag,TabOutput=str(TabOutput), ToggleBtn = str(ToggleBtn),id=str(id) )
+    
+
+
+
+
+
+def getAssociationDetails(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT VMWare_Partner_ID,MS_Partner_ID,SAP_Partner_ID,Oracle_Partner_ID,Dell_Partner_ID,Citrix_Partner_ID,RH_Partner_ID,IBM_Partner_ID,Cisco_Partner_ID  from rhpartners.ptt where id =" + id +" ;"
+    data = pd.read_sql(query,cnx)    
+    cnx.close()
+    if data is None:
+        return "Username or Password is wrong"
+    
+    htmlText = ''
+    
+
+#    if data['RH_Partner_ID'].iloc[0] != '' :
+#        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Red Hat</b></font></td> <td>')
+#        htmlText = htmlText + '-' + '</td><td>' # Product & Services
+#        htmlText = htmlText + '-' + '</td><td>' # Specialization
+#        htmlText = htmlText + '-' +  str('</td><td>') # Certification
+#        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+#        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+
+    if data['Cisco_Partner_ID'].iloc[0] != '' :
+        CDet = getCiscoAssDet(id)
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Cisco</b></font></td> <td>')
+        htmlText = htmlText +   str(CDet[4]) + '</td><td>' # Product & Services
+        htmlText = htmlText + str(CDet[0])[3:len(str(CDet[0]))-2] + '</td><td>' # Specialization
+        htmlText = htmlText +   str(CDet[3]) +  str('</td><td>') # Certification
+        htmlText = htmlText +    str(CDet[1])  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+        
+    if data['Citrix_Partner_ID'].iloc[0] != '' :
+        CDet = getCitrixAssDet(id)
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Citrix</b></font></td> <td>')
+        htmlText = htmlText + "<b>Products Certified to Sell : </b><br><ul>" + str(CDet[3]).replace("Citrix","</li><li>Citrix") + '</td><td>' # Product & Services
+        htmlText = htmlText + str(CDet[0])[3:len(str(CDet[0]))-2] + '</td><td>' # Specialization
+        Citrix_Certifications_Held_by_Staff = "<b>Citrix_Certifications_Held_by_Staff : </b><br>" +str(CDet[6])[:31]+ "<ul><li>" + str(CDet[6])[31:].replace(")",")</li><li>")  
+        htmlText = htmlText +  "<b>Certification Count : </b>" + str(CDet[2])  + "<br/>" +str(Citrix_Certifications_Held_by_Staff)[:len(str(Citrix_Certifications_Held_by_Staff))-9] +  str('</td><td>') # Certification
+        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  str(CDet[0])   + str('</td></tr>') # Partnership Level
+
+    if data['Dell_Partner_ID'].iloc[0] != '' :
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Dell</b></font></td> <td>')
+        htmlText = htmlText + '-' + '</td><td>' # Product & Services
+        htmlText = htmlText + '-' + '</td><td>' # Specialization
+        htmlText = htmlText + '-' +  str('</td><td>') # Certification
+        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+
+
+    if data['IBM_Partner_ID'].iloc[0] != '' :
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>IBM</b></font></td> <td>')
+        htmlText = htmlText + '-' + '</td><td>' # Product & Services
+        htmlText = htmlText + '-' + '</td><td>' # Specialization
+        htmlText = htmlText + '-' +  str('</td><td>') # Certification
+        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+
+    if data['MS_Partner_ID'].iloc[0] != '' :
+        CDet = getMSAssDet(id)
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Microsoft</b></font></td> <td>')
+        htmlText = htmlText + str("<b>Applications : </b><ul><li>") + str(CDet[1]).replace("|","</li><li>") + '<BR/>' + str("<br><b>Services : </b><ul><li>") + str(CDet[3]).replace("|","</li><li>") + '</td><td>' # Product & Services
+        htmlText = htmlText + str("<b>Competencies : </b><ul><li>") + str(CDet[2]).replace("|","</li><li>") + '</td><td>' # Specialization
+        htmlText = htmlText + '-' +  str('</td><td>') # Certification
+        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText +   "<b>Average Rating : </b>" + str(CDet[0])   + str('</td></tr>') # Partnership Level
+
+        
+
+        
+    if data['Oracle_Partner_ID'].iloc[0] != '' :
+        CDet = getOracleAssDet(id)
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Oracle</b></font></td> <td>')
+        htmlText = htmlText + '-' + '</td><td>' # Product & Services
+        htmlText = htmlText + "<b>Advance Specialization Applications : </b>" + str(CDet[2]) + '<br/>' + "<br><b>Active Specialization Applications : </b>" + str(CDet[7]) +'</td><td>' # Specialization
+        htmlText = htmlText + '-' +  str('</td><td>') # Certification
+        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  "" + str(CDet[0])    + str('</td></tr>') # Partnership Level
+
+      
+
+
+    if data['SAP_Partner_ID'].iloc[0] != '' :
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>SAP</b></font></td> <td>')
+        htmlText = htmlText + '-' + '</td><td>' # Product & Services
+        htmlText = htmlText + '-' + '</td><td>' # Specialization
+        htmlText = htmlText + '-' +  str('</td><td>') # Certification
+        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+
+
+
+
+    if data['VMWare_Partner_ID'].iloc[0] != '' :
+        CDet = getVMWareAssDet(id)
+        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>VMWare</b></font></td> <td>')
+        htmlText = htmlText + '-' + '</td><td>' # Product & Services
+        htmlText = htmlText + "<b>Solution Competency : </b>" + str(CDet[1])  + '</td><td>' # Specialization
+        htmlText = htmlText + str("<b>VMware Certified Professionals : </b>") + str(CDet[4]) + str("<br><br><b>VMware Technical Solutions Professionals : </b>") + str(CDet[5]) + str("<br><br><b>VMware Sales Professionals : </b>") + str(CDet[6])+ str("<br><br><b>VSPCPs : </b>") + str(CDet[7]) +  str("<br><br><b>VMware Operations Professionals : </b>") + str(CDet[8]) + str("<br><br><b>Total Reseller VLEs : </b>") + str(CDet[9]) +  str("<br><br><b>Total Disti VLEs : </b>") + str(CDet[10]) + str('</td><td>') # Certification
+        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  "" + str(CDet[2])   + str('</td></tr>') # Partnership Level
+
+       
+    return htmlText
+
+
+
+
+
+
+
+
+
 
 
 def getPAttributes(id):

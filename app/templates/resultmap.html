@@ -19,24 +19,66 @@
    <script type="text/javascript">
   
     google.load('visualization', '1', { 'packages': ['geochart'] });
+    google.load('visualization', '1', {packages:['corechart']});
     google.setOnLoadCallback(drawMap);
+    google.setOnLoadCallback(drawBubbleChart);
+    google.setOnLoadCallback(drawDonut);
 
 
 
     function drawMap() {
     var data = google.visualization.arrayToDataTable({{dfmap|safe}});
-    var options = {};
-    options['resolution'] = 'countries';
-    options['width'] = '50%';
-    options['colorAxis'] = {minValue: 0,  colors: ['#ddeef8', '#a3d6fb','#0078c0', '#ffe04e', '#f8931f', '#d54215',]}
+    var options = {
+    
+    };
+    
+    options['colorAxis'] = {minValue: 0,  colors: ['#ddeef8', '#a3d6fb','#0078c0', '#ffe04e', '#f8931f', '#d54215',]};
     var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
     chart.draw(data, options);
     drawBubbleChart();
     drawRingChart();
+   
   };
 
 
-    function drawBubbleChart()
+
+
+      function drawDonut() {
+        var data = google.visualization.arrayToDataTable({{DonutList|safe}});
+
+        var options = {
+          title: 'Potential Red Hat Partners By Product/Specialisation',
+          pieHole: 0.6,
+          chartArea: {top:40, left:10, height:'90%', width:'100%'}
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('donut_div'));
+        chart.draw(data, options);
+      }
+
+
+
+
+    
+    
+    function drawBubbleChart() {
+
+      var data = google.visualization.arrayToDataTable({{BubbleList|safe}});
+      var options = {
+        title: 'Top 7 Countries with Potential Red Hat Partners',
+        hAxis: {title: 'Diamond_Gold_Partners_Count'},
+        vAxis: {title: 'AverageRating'},
+        bubble: {textStyle: {fontSize: 11}},
+        chartArea: {top:20, left:25, height:'80%', width:'75%'} 
+      };
+      var chart = new google.visualization.BubbleChart(document.getElementById('bubble_div'));
+      chart.draw(data, options);
+    };
+
+
+
+
+    function drawBubblesChart()
         {
              var svg = dimple.newSvg("#bubblechart_div");
               svg.attr("x", "8px")
@@ -294,71 +336,35 @@
                         };
                 </script>
             </div>
-  </div>
-
- 
+  </div> 
 <br/>
 </div>
 </div>
-
 </form>
 
-<div id="chart_div" style="width: 1200px; height: 400px;margin:0 auto;"></div>                        
+
+
+<table width = "100%">
+<tr width = "100%">
+<td width = "55%" height="40%" ><div id="chart_div"></div>
+</td>
+<td width = "40%">
+    <table width = "100%">
+            <tr>
+            <td><div id="bubble_div"  ></div></td>
+            </tr>
+            <tr>
+            <td><div  id="donut_div"></div></td>
+            </tr>
+    </table>
+</td>
+</tr>
+</table>
+
+
+
+
+                      
 </body>
-
-
-
-
-
-<script type="text/javascript">
-		var w = 500,
-		    h = 100;
-
-		var svg = d3.select("#chart")
-			.append("svg")
-			.attr("width", w)
-			.attr("height", h);
-    	
-
-            var data = {{BarJson | safe}}
-		d3.json(data, function(json) {
-	
-			
-			var max_n = 0;
-			for (var d in data) {
-				max_n = Math.max(data[d].Count, max_n);
-			}
-		
-			var dx = w / max_n;
-			var dy = h / data.length;
-	
-			// bars
-			var bars = svg.selectAll(".bar")
-				.data(data)
-				.enter()
-				.append("rect")
-				.attr("class", function(d, i) {return "bar " + d.GeoCountry;})
-				.attr("x", function(d, i) {return 0;})
-				.attr("y", function(d, i) {return dy*i;})
-                       .attr("fill","green") 
-				.attr("width", function(d, i) {return dx*d.Count})
-				.attr("height", dy);
-
-	
-			// labels
-			var text = svg.selectAll("text")
-				.data(data)
-				.enter()
-				.append("text")
-				.attr("class", function(d, i) {return "label " + d.GeoCountry;})
-				.attr("x", 5)
-				.attr("y", function(d, i) {return dy*i + 15;})
-				.text( function(d) {return d.GeoCountry + " (" + d.Count  + ")";})
-				.attr("font-size", "15px")
-				.style("font-weight", "bold");
-		});
-
-	</script>
-
 
 </html>

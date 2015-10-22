@@ -35,6 +35,12 @@ graph = Graph("http://localhost:7474/db/data/")
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
 
+
+
+
+
+
+
 @app.route('/gdrive',methods=['GET'])
 def gdrive():
     records = getGdriveData()
@@ -584,19 +590,22 @@ def getAssociationDetails(id):
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Cisco</b></font></td> <td>')
         htmlText = htmlText +   str(CDet[4]) + '</td><td>' # Product & Services
         htmlText = htmlText + str(CDet[0])[3:len(str(CDet[0]))-2] + '</td><td>' # Specialization
-        htmlText = htmlText +   str(CDet[3]) +  str('</td><td>') # Certification
+        htmlText = htmlText +   '-' + '</td><td>' # Certification
         htmlText = htmlText +    str(CDet[1])  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+        htmlText = htmlText + "<b>Category : </b><br/>" + str(CDet[3]) + '<br/><br/> <b>Partners Since :</b><br/>'+  str(CDet[2])   + str('</td></tr>') # Partnership Level
         
     if data['Citrix_Partner_ID'].iloc[0] != '' :
         CDet = getCitrixAssDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Citrix</b></font></td> <td>')
         htmlText = htmlText + "<b>Products Certified to Sell : </b><br><ul>" + str(CDet[3]).replace("Citrix","</li><li>Citrix") + '</td><td>' # Product & Services
-        htmlText = htmlText + str(CDet[0])[3:len(str(CDet[0]))-2] + '</td><td>' # Specialization
-        Citrix_Certifications_Held_by_Staff = "<b>Citrix_Certifications_Held_by_Staff : </b><br>" +str(CDet[6])[:31]+ "<ul><li>" + str(CDet[6])[31:].replace(")",")</li><li>")  
+        htmlText = htmlText + "<b>Industry Served : </b><br>" + str(CDet[4])+'</td><td>' # Specialization
+        Citrix_Certifications_Held_by_Staff = "<br/><b>Citrix_Certifications_Held_by_Staff : </b><br>" +str(CDet[6])[:31]+ "<ul><li>" + str(CDet[6])[31:].replace(")",")</li><li>")  
         htmlText = htmlText +  "<b>Certification Count : </b>" + str(CDet[2])  + "<br/>" +str(Citrix_Certifications_Held_by_Staff)[:len(str(Citrix_Certifications_Held_by_Staff))-9] +  str('</td><td>') # Certification
-        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  str(CDet[0])   + str('</td></tr>') # Partnership Level
+        htmlText = htmlText +  "<b>Services Offered : </b><br/>" + str(CDet[5])  + str('</td> <td>') # Authorization
+        if int(CDet[7])>0:
+            htmlText = htmlText + "<b>Role : </b><br/>" + str(CDet[1]) + "<br/><br/><b>Category : </b><br/>" + str(CDet[0]) + "<br/><br/><b>Partner Since : </b>" + str(2015 - int(CDet[7]) ) + str('</td></tr>') # Partnership Level
+        else:
+            htmlText = htmlText + "<b>Role : </b><br/>" + str(CDet[1]) + "<br/><br/><b>Category : </b>" + str(CDet[0]) +  str('</td></tr>') # Partnership Level
 
     if data['Dell_Partner_ID'].iloc[0] != '' :
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Dell</b></font></td> <td>')
@@ -1022,7 +1031,7 @@ def getCitrixAssDet(id):
         row = cur.fetchone()
     cur.close()
     
-    query = "SELECT Citrix_Partnership_Level,Citrix_Partner_Type, Citrix_Cert_Count, Citrix_Products_Certified_to_Sell,Citrix_Industries_Served,Citrix_Services_Offered,Citrix_Certifications_Held_by_Staff   from rhpartners.citrixportal_partnerdata2 where Citrix_PID like '" + Citrix_Id +"%' ;"
+    query = "SELECT Citrix_Partnership_Level,Citrix_Partner_Type, Citrix_Cert_Count, Citrix_Products_Certified_to_Sell,Citrix_Industries_Served,Citrix_Services_Offered,Citrix_Certifications_Held_by_Staff, Citrix_Partnership_Age   from rhpartners.citrixportal_partnerdata2 where Citrix_PID like '" + Citrix_Id +"%' ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1144,11 +1153,57 @@ def mapview():
     #IRingJson = csv.writer(IRingJson, quoting=csv.QUOTE_ALL)
 #    columns = ['product']
 #    IRingJson = pd.DataFrame(ORingJson ,columns=columns)
-#    
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson)
+#        
+    x = getBubbleList()
+    x = pd.DataFrame(x)
+    BubbleList = []
+    BubbleList.append([ 'Country_Code','Diamond_Gold_Partners_Count','AverageRating','Country','PartnerCount' ])
+    
+    for j in range(0,len(x.ix[:,:])):
+        BubbleList.append([  str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1]  ,  x.ix[j,2] ,  str(filter(lambda x: x in string.printable, x.ix[j,3])) ,  x.ix[j,4]  ])      
+
+
+    DonutList = getDonutList()
+
+
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList)
 
 
 
+def getBubbleList():
+    cnx = mysql.connector.connect(user='rbajaj', password='nxzd8978',host='localhost',database='rhpartners')
+    sql=  "SELECT * from ptt_GeoCountry_NonRH_Gold_Diamond_Partners;"
+    NonRH_Gold_Diamond_Partners=pd.read_sql(sql, cnx)
+    sql= "SELECT * from ptt_GeoCountry_Avg_Levels;"
+    ptt_GeoCountry_Avg_Levels=pd.read_sql(sql, cnx)
+    sql=  "SELECT * from ptt_GeoCountry_PartnersCount;"
+    ptt_GeoCountry_PartnersCount=pd.read_sql(sql, cnx)
+    ptt_GeoCountry_PartnersCount = ptt_GeoCountry_PartnersCount.sort('Count(*)',ascending=False).head(7)
+    resultset = pd.DataFrame.merge(ptt_GeoCountry_PartnersCount, ptt_GeoCountry_Avg_Levels, left_on='Country', right_on='GeoCountry', how='inner')
+    resultset = pd.DataFrame.merge(resultset, NonRH_Gold_Diamond_Partners, left_on='Country', right_on='GeoCountry', how='inner')
+    resultset = resultset.drop(resultset.columns[[3, 5]], axis=1) # Note: zero indexed
+    resultset.columns = ['Country_Code','Country','PartnerCount','AverageRating','Diamond_Gold_Partners_Count']
+    result = pd.concat([resultset.Country_Code,resultset.Diamond_Gold_Partners_Count,resultset.AverageRating,resultset.Country,resultset.PartnerCount],axis=1)
+    return result
+    
+
+
+def getDonutList():
+    cnx = mysql.connector.connect(user='rbajaj', password='nxzd8978',host='localhost',database='rhpartners')
+    sql=  "    SELECT SUM(Prod_Analytics) AS Analytics,SUM(Prod_IoT) AS IoT,SUM(Prod_Platforms) AS Platforms,SUM(Prod_Virtualization) AS Virtualization,SUM(Prod_Cloud) AS Cloud,SUM(Prod_Storage) AS Storage,SUM(Prod_Middleware) AS Middleware,SUM(Prod_DataManagement) AS DataManagement,SUM(Prod_Mobility) AS Mobility,SUM(Prod_CRM) AS CRM,SUM(Prod_SCM) AS SCM,SUM(Prod_Security) AS Security FROM rhpartners.pttv1 Where RH_Partner!=1;"
+    DonutList=pd.read_sql(sql, cnx)
+    DonutList = DonutList.transpose()
+    DonutList.index.name = 'Product'
+    DonutList.reset_index(inplace=True)
+    df = pd.DataFrame(DonutList.values.tolist())
+    x = df
+    x = pd.DataFrame(x)
+    DonutList = []
+    DonutList.append([ 'Product','Count' ])
+        
+    for j in range(0,len(x.ix[:,:])):
+        DonutList.append([ str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1]   ]) 
+    return DonutList    
 
 
 
@@ -1326,22 +1381,27 @@ def tmapview():
     else: 
         x= getPartnersLoc('') 
     x= getPartnersLoc(query)
-    x= DataFrame(x)  
+    x= pd.DataFrame(x)  
     variable = []
     variable.append([ 'Country' , 'Partners'  ])
     for j in range(0,len(x.ix[:,:])):
         variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])      
     BarJson = getBarJson()
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,BarJson = BarJson)
+    
+    
+    x = getBubbleList()
+    x= pd.DataFrame(x)
+    BubbleList = []
+    BubbleList.append([ 'Country_Code','Country','PartnerCount','AverageRating','Diamond_Gold_Partners_Count' ])
+    
+    for j in range(0,len(x.ix[:,:])):
+        BubbleList.append([  str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  round(x.ix[j,1],2)  ,  round(x.ix[j,2],2)  ,  str(filter(lambda x: x in string.printable, x.ix[j,3])) ,  int(x.ix[j,4])  ])      
+    
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,BubbleList = BubbleList, x = x)
 
 
 
-
-
-
-
-
-
+    
 @app.route('/graphview', methods=['GET', 'POST'])
 def graphview():
     form = SearchForm(csrf_enabled=False)
@@ -1553,23 +1613,6 @@ def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,De
 
 
 
-
-def index():
-    user = {'nickname': 'Miguel'}  # fake user
-    posts = [  # fake array of posts
-        { 
-            'author': {'nickname': 'John'}, 
-            'body': 'Beautiful day in Portland!' 
-        },
-        { 
-            'author': {'nickname': 'Susan'}, 
-            'body': 'The Avengers movie was so cool!' 
-        }
-    ]
-    return render_template("index.html",
-                           title='Home',
-                           user=user,
-                           posts=posts)
                            
                            
 
@@ -1577,14 +1620,6 @@ def index():
                            
 
     
-engine = create_engine('mysql://rbajaj:nxzd8978@localhost') 
-engine.execute('use rhpartners;')					 
-
-global csv
-
-
-def Main():
-    return render_template("practise.html")
 
 
 

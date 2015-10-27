@@ -592,7 +592,7 @@ def getAssociationDetails(id):
         htmlText = htmlText + "<b>Industry Served : </b><br>" + str(CDet[4])+'</td><td>' # Specialization
         Citrix_Certifications_Held_by_Staff = "<br/><b>Citrix_Certifications_Held_by_Staff : </b><br>" +str(CDet[6])[:31]+ "<ul><li>" + str(CDet[6])[31:].replace(")",")</li><li>")  
         htmlText = htmlText +  "<b>Certification Count : </b>" + str(CDet[2])  + "<br/>" +str(Citrix_Certifications_Held_by_Staff)[:len(str(Citrix_Certifications_Held_by_Staff))-9] +  str('</td><td>') # Certification
-        htmlText = htmlText +  "<b>Services Offered : </b><br/>" + str(CDet[5])  + str('</td> <td>') # Authorization
+        htmlText = htmlText +  "<b>Services Offered : </b><br/><ul><li>" + str(CDet[5]).replace("|","</li><li>")[:-4]  + str('</ul></td> <td>') # Authorization
         if int(CDet[7])>0:
             htmlText = htmlText + "<b>Role : </b><br/>" + str(CDet[1]) + "<br/><br/><b>Category : </b><br/>" + str(CDet[0]) + "<br/><br/><b>Partner Since : </b>" + str(2015 - int(CDet[7]) ) + str('</td></tr>') # Partnership Level
         else:
@@ -655,12 +655,18 @@ def getAssociationDetails(id):
 
     if data['SAP_Partner_ID'].iloc[0] != '' :
         CDet = getSAPAssDet(id)
-        
-        htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>SAP</b></font></td> <td>')
-        htmlText = htmlText + '-' + '</td><td>' # Product & Services
-        htmlText = htmlText + cleanList(str(CDet[3])) + '</td><td>' # Specialization
+        Specs = '-'
+        if CDet[4]:            
+            if len(str(CDet[4]))>4:
+                Specs = str('<b>SAP Partner Focus Area & Recognised Expertise</b><br>')+ cleanList(str(CDet[4]))
+            else:
+                Specs = '-'
+        # SAP_Engagement,SAP_Type,SAP_Level,SAP_SolnAuth,SAP_FocusArea_RecognisedExpertise,SAP_IndFocus
+        htmlText = htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>SAP</b></font></td> <td>')
+        htmlText = htmlText+ "<b>SAP Solutions : </b><br/>"  + cleanList(str(CDet[3]))   +'</td><td>' # Product & Services
+        htmlText = htmlText + str(Specs) + '</td><td>' # Specialization
         htmlText = htmlText + '-' +  str('</td><td>') # Certification
-        htmlText = htmlText +   cleanList(str(CDet[0])) + "<br><br>" + cleanList(str(CDet[3]))   + str('</td> <td>') # Authorization
+        htmlText = htmlText +   cleanList(str(CDet[0])) + "<br><br>" +  str('</td> <td>') # Authorization
         htmlText = htmlText + "<b>Role : </b><br/>" + cleanList(str(CDet[1]))  + "<br><b>Category : </b>" + str(CDet[2])  + str('</td></tr>') # Partnership Level
 
 
@@ -920,6 +926,33 @@ def getIBMProdDet(id):
     for i in prodlist:
         result_list = result_list + '<b>' + str(i) + '</b>' + cleanList(str(list(ibm_partner_product.Brand_Product[ibm_partner_product.Role == i]))) 
     return result_list
+
+
+
+def getIBMSolnAreaDet(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    IBM_Id = ''
+    while row is not None:
+        IBM_Id =  row[0]
+        row = cur.fetchone()
+    cur.close()
+    
+    query = "SELECT SolutionArea from ibm_partner_certifications  where id like '" + IBM_Id +"' ;"
+    
+    ibm_partner_cert=pd.read_sql(query, cnx)
+    cnx.close()
+    Brand_Productlist = ibm_partner_cert.Brand_Product.unique().tolist()
+    result_list = ''
+    for i in Brand_Productlist:
+        result_list = result_list + '<b>' + str(i) + '</b>' + cleanList(str(list(ibm_partner_cert.Certification[ibm_partner_cert.Brand_Product == i]))) 
+    return result_list
+
+
+
 
 
 

@@ -11,34 +11,32 @@ import mysql.connector
 from app import app
 import numpy as np
 from .SearchForm import SearchForm
-from sqlalchemy import create_engine 
 import pandas as pd            
 from pandas import DataFrame
 from flask import Flask , request, render_template, Response,redirect,jsonify,make_response,session
-from neo4jrestclient.client import GraphDatabase
-from neo4jrestclient.constants import RAW
-from neo4jrestclient.client import Node 
 import re, json
-from py2neo import neo4j, node, rel 
-from py2neo import Graph
-from py2neo import authenticate
 import collections
 from datetime import date
-import StringIO
 import math
 import csv
-import ast
-
-authenticate("localhost:7474", "neo4j", "password")
-graph = Graph("http://localhost:7474/db/data/")
+import pandasql as pdsql
 
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
-
-
-
-
-
+global PTT_Dataset
+cnx1 = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+squery = "SELECT * from rhpartners.pttv1 ;"
+PTT_Dataset = pd.read_sql(squery,cnx1)    
+cnx1.close()
+    
+    
+def getDataSet():
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    squery = "SELECT * from rhpartners.pttv1 ;"
+    PTT_Dataset = pd.read_sql(squery,cnx)    
+    cnx.close()
+    return PTT_Dataset
+    
 
 
 @app.route('/gdrive',methods=['GET'])
@@ -158,6 +156,8 @@ def home():
         x= getPartners('')
     x= getPartners(query)
     x= DataFrame(x)
+    x = x.reset_index()
+    x = x.ix[:,1:]
     nrows = len(x.index)
     variable = []
     geo = [['Lat', 'Long', 'Name']]
@@ -189,7 +189,6 @@ def home():
 @app.route('/search', methods=['GET', 'POST'])
 @app.route('/graphview', methods=['GET', 'POST'])
 def search():
-
     query = ''
     form = SearchForm(csrf_enabled=False)
     productFilter = ''
@@ -211,17 +210,6 @@ def search():
     RH_Partner_req = ''
     SAP_Partner_req = ''
     Global_Partner_req = ''
-#
-#
-#    rule = request.url_rule
-#
-#
-#    try:
-#        dummy = id
-#    except:
-#        dummy =0
-#        
-#        
     prod_req = str(form.prod_req.data)
     ind_req = str(form.ind_req.data)
     region_req = str(form.region_req.data)
@@ -306,6 +294,9 @@ def search():
         x= getPartners('')
     x= getPartners(query)
     x= DataFrame(x)
+    x = x.reset_index()
+    x = x.ix[:,1:]
+
     nrows = len(x.index)
     variable = []
     geo = [['Lat', 'Long', 'Name']]
@@ -608,26 +599,40 @@ def getAssociationDetails(id):
             htmlText = htmlText + "<b>Role : </b><br/>" + str(CDet[1]) + "<br/><br/><b>Category : </b>" + str(CDet[0]) +  str('</td></tr>') # Partnership Level
 
     if data['Dell_Partner_ID'].iloc[0] != '' :
+        CDet = getDellAssDet(id)
+        Relationship = ''
+        Competencies = ''
+        if CDet[2]:            
+            if len(str(CDet[2]))>4:
+                Relationship = str("</br></br><br><b>Relationship : </b>") + str(CDet[2])
+                
+        if CDet[1]:            
+            if len(str(CDet[1]))>4:
+                Competencies = str("</br></br><b>Competencies : </b>") + str(CDet[1])
+
+                
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Dell</b></font></td> <td>')
         htmlText = htmlText + '-' + '</td><td>' # Product & Services
-        htmlText = htmlText + '-' + '</td><td>' # Specialization
+        htmlText = htmlText + Competencies + '</td><td>' # Specialization
         htmlText = htmlText + '-' +  str('</td><td>') # Certification
         htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+        htmlText = htmlText +  Relationship   + str('</td></tr>') # Partnership Level
 
 
     if data['IBM_Partner_ID'].iloc[0] != '' :
+        prodList = getIBMProdDet(id)
+        certList = getIBMCertDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>IBM</b></font></td> <td>')
-        htmlText = htmlText + '-' + '</td><td>' # Product & Services
+        htmlText = htmlText + '' + '</td><td>' # Product & Services
         htmlText = htmlText + '-' + '</td><td>' # Specialization
-        htmlText = htmlText + '-' +  str('</td><td>') # Certification
-        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
+        htmlText = htmlText + certList +  str('</td><td>') # Certification
+        htmlText = htmlText +   prodList  + str('</td> <td>') # Authorization
         htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
 
     if data['MS_Partner_ID'].iloc[0] != '' :
         CDet = getMSAssDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Microsoft</b></font></td> <td>')
-        htmlText = htmlText + str("<b>Applications : </b><ul><li>") + str(CDet[1]).replace("|","</li><li>") + '<BR/>' + str("<br><b>Services : </b><ul><li>") + str(CDet[3]).replace("|","</li><li>") + '</td><td>' # Product & Services
+        htmlText = htmlText + str("<b>Applications : </b><ul><li>") + str(CDet[1]).replace("|","</li><li>") + '</ul><BR/>' + str("<br><b>Services : </b><ul><li>") + str(CDet[3]).replace("|","</li><li>") + '</td><td>' # Product & Services
         htmlText = htmlText + str("<b>Competencies : </b><ul><li>") + str(CDet[2]).replace("|","</li><li>") + '</td><td>' # Specialization
         htmlText = htmlText + '-' +  str('</td><td>') # Certification
         htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
@@ -643,18 +648,20 @@ def getAssociationDetails(id):
         htmlText = htmlText + "<b>Advance Specialization Applications : </b>" + str(CDet[2]) + '<br/>' + "<br><b>Active Specialization Applications : </b>" + str(CDet[7]) +'</td><td>' # Specialization
         htmlText = htmlText + '-' +  str('</td><td>') # Certification
         htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  "" + str(CDet[0])    + str('</td></tr>') # Partnership Level
+        htmlText = htmlText + "<b>Category : </b><br/>" + str(CDet[0])    + str('</td></tr>') # Partnership Level
 
       
 
 
     if data['SAP_Partner_ID'].iloc[0] != '' :
+        CDet = getSAPAssDet(id)
+        
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>SAP</b></font></td> <td>')
         htmlText = htmlText + '-' + '</td><td>' # Product & Services
-        htmlText = htmlText + '-' + '</td><td>' # Specialization
+        htmlText = htmlText + cleanList(str(CDet[3])) + '</td><td>' # Specialization
         htmlText = htmlText + '-' +  str('</td><td>') # Certification
-        htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+        htmlText = htmlText +   cleanList(str(CDet[0])) + "<br><br>" + cleanList(str(CDet[3]))   + str('</td> <td>') # Authorization
+        htmlText = htmlText + "<b>Role : </b><br/>" + cleanList(str(CDet[1]))  + "<br><b>Category : </b>" + str(CDet[2])  + str('</td></tr>') # Partnership Level
 
 
 
@@ -666,7 +673,7 @@ def getAssociationDetails(id):
         htmlText = htmlText + "<b>Solution Competency : </b>" + str(CDet[1])  + '</td><td>' # Specialization
         htmlText = htmlText + str("<b>VMware Certified Professionals : </b>") + str(CDet[4]) + str("<br><br><b>VMware Technical Solutions Professionals : </b>") + str(CDet[5]) + str("<br><br><b>VMware Sales Professionals : </b>") + str(CDet[6])+ str("<br><br><b>VSPCPs : </b>") + str(CDet[7]) +  str("<br><br><b>VMware Operations Professionals : </b>") + str(CDet[8]) + str("<br><br><b>Total Reseller VLEs : </b>") + str(CDet[9]) +  str("<br><br><b>Total Disti VLEs : </b>") + str(CDet[10]) + str('</td><td>') # Certification
         htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  "" + str(CDet[2])   + str('</td></tr>') # Partnership Level
+        htmlText = htmlText + "<b>Category : </b><br/>"  + str(CDet[2])   + str('</td></tr>') # Partnership Level
 
        
     return htmlText
@@ -784,9 +791,6 @@ def getCompAssociationDetails(id):
             if len(str(CDet[1]))>4:
                 Competencies = str("</br></br><b>Competencies : </b>") + str(CDet[1])
 
-        if CDet[3]:            
-            if len(str(CDet[3]))>4:
-                P_Customer = str("</br></br><b>Primary Customer : </b>") + str(CDet[3])
 
         htmlText =  htmlText +P_Customer+ Relationship + Competencies + str("  </div>")                                
     if data['IBM_Partner_ID'].iloc[0] != '' :
@@ -895,6 +899,103 @@ def getCompAssociationDetails(id):
 
 
 
+def getIBMProdDet(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    IBM_Id = ''
+    while row is not None:
+        IBM_Id =  row[0]
+        row = cur.fetchone()
+    cur.close()
+    
+    query = "SELECT CONCAT(`Brand`, '-', `ProductorService`) AS 'Brand_Product', Role from ibm_partner_product  where id like '" + IBM_Id +"' ;"
+    
+    ibm_partner_product=pd.read_sql(query, cnx)
+    cnx.close()
+    prodlist = ibm_partner_product.Role.unique().tolist()
+    result_list = ''
+    for i in prodlist:
+        result_list = result_list + '<b>' + str(i) + '</b>' + cleanList(str(list(ibm_partner_product.Brand_Product[ibm_partner_product.Role == i]))) 
+    return result_list
+
+
+
+
+
+
+def getIBMCertDet(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    IBM_Id = ''
+    while row is not None:
+        IBM_Id =  row[0]
+        row = cur.fetchone()
+    cur.close()
+    
+    query = "SELECT CONCAT(`Brand`, '-', `ProductorService`) AS 'Brand_Product', Certification from ibm_partner_certifications  where id like '" + IBM_Id +"' ;"
+    
+    ibm_partner_cert=pd.read_sql(query, cnx)
+    cnx.close()
+    Brand_Productlist = ibm_partner_cert.Brand_Product.unique().tolist()
+    result_list = ''
+    for i in Brand_Productlist:
+        result_list = result_list + '<b>' + str(i) + '</b>' + cleanList(str(list(ibm_partner_cert.Certification[ibm_partner_cert.Brand_Product == i]))) 
+    return result_list
+    
+    
+    
+
+
+def cleanList(listItem):
+    cleanedList = '<ul>' + str(listItem)
+    cleanedList = str(cleanedList).replace("u'","<li>")
+    cleanedList = str(cleanedList).replace("',","</li>")
+    cleanedList = str(cleanedList).replace("[","")
+    cleanedList = str(cleanedList).replace("]","")
+    cleanedList = str(cleanedList)[:-1]
+    cleanedList = cleanedList + '</ul>'
+    return cleanedList
+
+
+
+
+
+
+
+def getSAPAssDet(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT SAP_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    SAP_Id = ''
+    while row is not None:
+        SAP_Id =  row[0]
+        row = cur.fetchone()
+    cur.close()
+    
+    query = "SELECT SAP_Engagement,SAP_Type,SAP_Level,SAP_SolnAuth,SAP_FocusArea_RecognisedExpertise,SAP_IndFocus FROM rhpartners.sap_partners where SAP_partner_link like '%" + SAP_Id +"%' ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    cnx.close()
+    return row
+
+
+
+
+
+
+
+
+
+
 def getDellAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     query = "SELECT Dell_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
@@ -907,7 +1008,7 @@ def getDellAssDet(id):
         row = cur.fetchone()
     cur.close()
     
-    query = "SELECT `dell_partnerdetails`.`PartnerId`,`dell_partnerdetails`.`Competencies`,`dell_partnerdetails`.`Relationship`  ,`dell_partnerdetails`.`P_PrimaryCustomer`  FROM `rhpartners`.`dell_partnerdetails` where PartnerId like '" + Dell_Id +"' ;"
+    query = "SELECT `dell_partnerdetails`.`PartnerId`,`dell_partnerdetails`.`Competencies`,`dell_partnerdetails`.`Relationship`    FROM `rhpartners`.`dell_partnerdetails` where PartnerId like '" + Dell_Id +"' LIMIT 1 ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1086,14 +1187,6 @@ def mapview():
     session['SAP_Partner_req'] = SAP_Partner_req
     
     
-#    try:
-#        dummy = session['req']
-#    except:
-#        session['req'] = 0
-#
-#    rule = request.url_rule
-
-    
     if prod_req != 'Any':
         productFilter = getProductFilter(prod_req)
         query = query + str(productFilter)
@@ -1147,13 +1240,7 @@ def mapview():
         variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])      
     BarJson = getBubbleJson(country_req)
     ORingJson = getORingJson(country_req)
-   # ORingJson = json.dumps(ORingJson)
     IRingJson = getIRingJson(country_req)
-    #IRingJson = json.dumps(IRingJson)
-    #IRingJson = csv.writer(IRingJson, quoting=csv.QUOTE_ALL)
-#    columns = ['product']
-#    IRingJson = pd.DataFrame(ORingJson ,columns=columns)
-#        
     x = getBubbleList()
     x = pd.DataFrame(x)
     BubbleList = []
@@ -1163,7 +1250,7 @@ def mapview():
         BubbleList.append([  str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1]  ,  x.ix[j,2] ,  str(filter(lambda x: x in string.printable, x.ix[j,3])) ,  x.ix[j,4]  ])      
 
 
-    DonutList = getDonutList()
+    DonutList = getDonutList(query)
 
 
     return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList)
@@ -1188,14 +1275,15 @@ def getBubbleList():
     
 
 
-def getDonutList():
-    cnx = mysql.connector.connect(user='rbajaj', password='nxzd8978',host='localhost',database='rhpartners')
-    sql=  "    SELECT SUM(Prod_Analytics) AS Analytics,SUM(Prod_IoT) AS IoT,SUM(Prod_Platforms) AS Platforms,SUM(Prod_Virtualization) AS Virtualization,SUM(Prod_Cloud) AS Cloud,SUM(Prod_Storage) AS Storage,SUM(Prod_Middleware) AS Middleware,SUM(Prod_DataManagement) AS DataManagement,SUM(Prod_Mobility) AS Mobility,SUM(Prod_CRM) AS CRM,SUM(Prod_SCM) AS SCM,SUM(Prod_Security) AS Security FROM rhpartners.pttv1 Where RH_Partner!=1;"
-    DonutList=pd.read_sql(sql, cnx)
-    DonutList = DonutList.transpose()
-    DonutList.index.name = 'Product'
-    DonutList.reset_index(inplace=True)
-    df = pd.DataFrame(DonutList.values.tolist())
+def getDonutList(queryclause):
+    pysql = lambda q: pdsql.sqldf(q, globals())
+    str1 = "select * from  PTT_Dataset where " + queryclause + " ;"
+    ResultDS = pysql(str1)
+    PTT_Dataset_Agg = ResultDS.ix[:,72:84]
+    PTT_Dataset_Agg = pd.DataFrame(PTT_Dataset_Agg.sum())
+    PTT_Dataset_Agg.index.name = 'Product'
+    PTT_Dataset_Agg.reset_index(inplace=True)
+    df = pd.DataFrame(PTT_Dataset_Agg.values.tolist())
     x = df
     x = pd.DataFrame(x)
     DonutList = []
@@ -1203,6 +1291,7 @@ def getDonutList():
         
     for j in range(0,len(x.ix[:,:])):
         DonutList.append([ str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1]   ]) 
+    
     return DonutList    
 
 
@@ -1254,7 +1343,7 @@ def getIRingJson(country_req):
         
 
 def getORingJson(country_req):
-    query = 'SELECT sum(Prod_Platforms) as Prod_Platforms,sum(Prod_Virtualization) as Prod_Virtualization,sum(Prod_Cloud) as Prod_Cloud ,sum(Prod_Storage) as Prod_Storage ,sum(Prod_Middleware) as Prod_Middleware,sum(Prod_Analytics) as Prod_Analytics,sum(Prod_IoT) as Prod_IoT,sum(Prod_DataManagement) as Prod_DataManagement,sum(Prod_Mobility) as Prod_Mobility,sum(Prod_SCM) as Prod_SCM, sum(Prod_CRM) as Prod_CRM,sum(Prod_Security) as Prod_Security, sum(Prod_Platforms)+sum(Prod_Virtualization)+sum(Prod_Cloud)+sum(Prod_Storage)+sum(Prod_Middleware)+sum(Prod_Analytics)+sum(Prod_IoT)+sum(Prod_DataManagement)+sum(Prod_Mobility)+sum(Prod_SCM)+ sum(Prod_CRM)+sum(Prod_Security) as total from rhpartners.ptt ;'
+    query = 'SELECT sum(Prod_Platforms) as Prod_Platforms,sum(Prod_Virtualization) as Prod_Virtualization,sum(Prod_Cloud) as Prod_Cloud ,sum(Prod_Storage) as Prod_Storage ,sum(Prod_Middleware) as Prod_Middleware,sum(Prod_Analytics) as Prod_Analytics,sum(Prod_IoT) as Prod_IoT,sum(Prod_DataManagement) as Prod_DataManagement,sum(Prod_Mobility) as Prod_Mobility,sum(Prod_SCM) as Prod_SCM, sum(Prod_CRM) as Prod_CRM,sum(Prod_Security) as Prod_Security, sum(Prod_Platforms)+sum(Prod_Virtualization)+sum(Prod_Cloud)+sum(Prod_Storage)+sum(Prod_Middleware)+sum(Prod_Analytics)+sum(Prod_IoT)+sum(Prod_DataManagement)+sum(Prod_Mobility)+sum(Prod_SCM)+ sum(Prod_CRM)+sum(Prod_Security) as total from rhpartners.ptt '
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     if country_req != 'Any' :
         query = query + ' where GeoCountry = "' + str(country_req) + '"'        
@@ -1289,8 +1378,8 @@ def getORingJson(country_req):
         #resultset.append( math.floor(round(int(data['Prod_CRM'].iloc[0])*100/data['total'].iloc[0])))
         #resultset.append( math.floor(round(int(data['Prod_Security'].iloc[0])*100/data['total'].iloc[0])))
         resultset = pd.DataFrame(resultset)
-        d1 = data.to_json()
-        d1 = data.to_json(orient='records')
+#        d1 = data.to_json()
+#        d1 = data.to_json(orient='records')
         
         return resultset
 
@@ -1326,13 +1415,6 @@ def tmapview():
     Oracle_Partner_req = session['Oracle_Partner_req']
     VM_Partner_req = session['VM_Partner_req']
     SAP_Partner_req = session['SAP_Partner_req']
-#    
-#    try:
-#        dummy = session['req']
-#    except:
-#        session['req'] = 0
-#
-#    rule = request.url_rule
 
     
     if prod_req != 'Any':
@@ -1386,7 +1468,6 @@ def tmapview():
     variable.append([ 'Country' , 'Partners'  ])
     for j in range(0,len(x.ix[:,:])):
         variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])      
-    BarJson = getBarJson()
     
     
     x = getBubbleList()
@@ -1429,16 +1510,6 @@ def graphview():
 
 
  
-
-def saveJson():
-    result = graph.cypher.execute("MATCH (n:Competitor) RETURN n LIMIT 25")
-    data = []
-    for i in result:
-        dati = collections.OrderedDict()
-        dati["CID"] = i[0]
-        data.append(dati)
-    return result
-
 
 
 
@@ -1575,16 +1646,16 @@ def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,De
 
     if RH_Partner_req == '1':
          if len(query)<5:
-             query = query + ' RH_Partner = 1' 
+             query = query + " RH_Partner = 1 " 
          else:
-             query = str(query) + ' and ' +  ' RH_Partner = 1 ' 
+             query = str(query) + ' and ' +  "  RH_Partner = 1  " 
                 
                 
     if RH_Partner_req == '0':
          if len(query)<5:
-             query = query + ' RH_Partner != 1' 
+             query = query +  'RH_Partner != 1'
          else:
-             query = str(query) + ' and ' +  ' RH_Partner != 1 ' 
+             query = str(query) + ' and ' +  'RH_Partner != 1' 
 
 
     if SAP_Partner_req == ['1']:
@@ -1595,14 +1666,14 @@ def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,De
              
     if Global_Partner_req:
          if len(query)<5:
-             query = query + ' Global_Partner = 1 ' 
+             query = query + ' Global_Partner == 1 ' 
          else:
-             query = str(query) + ' and  Global_Partner = 1 ' 
+             query = str(query) + ' and  Global_Partner == 1 ' 
     else:
          if len(query)<5:
-             query = query + ' Global_Partner != 2 ' 
+             query = query + " Global_Partner != 2 " 
          else:
-             query = str(query) + ' and  Global_Partner != 2 '
+             query = str(query) + " and  Global_Partner != 2 "
         
     return query                  
 
@@ -1610,65 +1681,78 @@ def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,De
 
 
 
-
-
-
-                           
-                           
-
-                           
-                           
-
-    
-
-
-
-
-
-
-@app.route('/csv',methods=['GET'])
-def csv():
-	global csv
-	return Response(
-        csv,
-        mimetype="text/csv",
-        headers={"Content-disposition":
-                 "attachment; filename=myplot.csv"})	
-                 
                  
                  
                  
 def getPartners(queryclause):
-    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.ptt "
-    
-    if len(queryclause)>5:        
-        query = query + 'WHERE ' + str(queryclause) + ' Order by Coordinates desc LIMIT 250;'     
-    else:
-        query = query + ' Order by Coordinates desc LIMIT 250 ;'
-    data = pd.read_sql(query,cnx)
-    
-    if data is None:
-        return "Username or Password is wrong"
-    return data
+    pysql = lambda q: pdsql.sqldf(q, globals())
+    str1 = "select Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from  PTT_Dataset where " + queryclause + "Order By Coordinates desc LIMIT 250 ;"
+    ResultDS = pysql(str1)
+#    if len(queryclause)>25:
+#        dfquery = '(' + queryclause + ')'
+#        if str(dfquery).find('and') >0:    
+            #dfquery = str(dfquery).replace('and' , ' ) and ( ')
+            #dfquery = str(dfquery).replace('"' , '')
+#    if len(dfquery)>7: 
+#        if dfquery.startswith('"') and dfquery.endswith('"'):
+#            dfquery = dfquery[1:-1]
+#        ResultDS = PTT_Dataset.query(str(dfquery))    
+#    else:
+#        ResultDS = PTT_Dataset
+#    else:
+#        ResultDS = PTT_Dataset
+    ResultDS = ResultDS[['Name','GeoCountry','GeoRegion','Partner_Url','id','Coordinates']]
+    ResultDS = ResultDS.sort(['Coordinates'], ascending=False)
+    ResultDS = ResultDS.head(250)
+    return ResultDS
+#    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+#    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.ptt "
+#    
+#    if len(queryclause)>5:        
+#        query = query + 'WHERE ' + str(queryclause) + ' Order by Coordinates desc LIMIT 250;'     
+#    else:
+#        query = query + ' Order by Coordinates desc LIMIT 250 ;'
+#    data = pd.read_sql(query,cnx)
+#    
+#    if data is None:
+#        return "Username or Password is wrong"
+#    return data
 
 
 
 
 def getPartnersLoc(queryclause):
-    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT GeoCountry,Count(*) AS Count from rhpartners.ptt "
-    
-    if len(queryclause)>5:        
-        query = query + 'WHERE ' + str(queryclause) + ' GROUP BY GeoCountry;'     
-    else:
-        query = query + '  GROUP BY GeoCountry;'
-    
-    data = pd.read_sql(query,cnx)
-    
-    if data is None:
-        return "Username or Password is wrong"
-    return data
+#    if len(queryclause)>5:
+#        dfquery = '(' + queryclause + ')'
+#        if str(dfquery).find('and') >0:    
+#            dfquery = str(dfquery).replace('and' , ' ) and ( ')
+#        if len(dfquery)>7: 
+#            ResultDS = PTT_Dataset.query(dfquery)    
+#        else:
+#            ResultDS = PTT_Dataset
+#    else:
+#        ResultDS = PTT_Dataset
+    pysql = lambda q: pdsql.sqldf(q, globals())
+    str1 = "select GeoCountry  from  PTT_Dataset where " + queryclause + " ;"
+    ResultDS = pysql(str1)
+    df = pd.DataFrame(ResultDS.GeoCountry.value_counts())
+    df.index.name = 'GeoCountry'
+    df.reset_index(inplace=True)
+    df.columns = ['GeoCountry','Count']
+    return df
+#    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+#    query = "SELECT GeoCountry,Count(*) AS Count from rhpartners.ptt "
+#    
+#    if len(queryclause)>5:        
+#        query = query + 'WHERE ' + str(queryclause) + ' GROUP BY GeoCountry;'     
+#    else:
+#        query = query + '  GROUP BY GeoCountry;'
+#    
+#    data = pd.read_sql(query,cnx)
+#    
+#    if data is None:
+#        return "Username or Password is wrong"
+#    return data
 
 
 def getProductFilter(prod_req):
@@ -1697,6 +1781,8 @@ def getProductFilter(prod_req):
     elif prod_req == 'Security':
         return ' Prod_Security = 1 ' 
         
+
+
         
         
         
@@ -1765,13 +1851,13 @@ def getName():
         Quarter = 'Q4' 
 
     # Get Month
-    Month = ''
-    if date.today().month == 3 or date.today().month == 6 or date.today().month == 9 or date.today().month == 12:    
-        Month = 'M1' 
-    elif date.today().month == 4 or date.today().month == 7 or date.today().month == 10 or date.today().month == 1:
-        Month = 'M2'         
-    elif date.today().month == 5 or date.today().month == 8 or date.today().month == 11 or date.today().month == 2:
-        Month = 'M3' 
+#    Month = ''
+#    if date.today().month == 3 or date.today().month == 6 or date.today().month == 9 or date.today().month == 12:    
+#        Month = 'M1' 
+#    elif date.today().month == 4 or date.today().month == 7 or date.today().month == 10 or date.today().month == 1:
+#        Month = 'M2'         
+#    elif date.today().month == 5 or date.today().month == 8 or date.today().month == 11 or date.today().month == 2:
+#        Month = 'M3' 
     return Year + '_' + Quarter + '_' 
 
 

@@ -23,19 +23,23 @@ import pandasql as pdsql
 
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
-global PTT_Dataset
-cnx1 = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-squery = "SELECT * from rhpartners.pttv1 ;"
-PTT_Dataset = pd.read_sql(squery,cnx1)    
-cnx1.close()
+PTT_Dataset = pd.DataFrame()
+initvar = 0
+#cnx1 = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+#squery = "SELECT * from rhpartners.pttv1 ;"
+#PTT_Dataset = pd.read_sql(squery,cnx1)    
+#cnx1.close()
     
     
-def getDataSet():
-    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    squery = "SELECT * from rhpartners.pttv1 ;"
-    PTT_Dataset = pd.read_sql(squery,cnx)    
-    cnx.close()
-    return PTT_Dataset
+def setDataSet():
+    global PTT_Dataset
+    if PTT_Dataset.shape[0]>90000:
+        pass
+    else:
+        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+        squery = "SELECT * from rhpartners.pttv1 ;"
+        PTT_Dataset = pd.read_sql(squery,cnx)    
+        cnx.close()
     
 
 
@@ -68,6 +72,11 @@ def gdrive():
 @app.route('/', methods= ['GET', 'POST'])
 @app.route('/reset', methods= ['GET', 'POST'])
 def home():
+    global initvar
+    if initvar ==0:
+        setDataSet()
+        initvar = 1
+        
     query = ''
     form = SearchForm(csrf_enabled=False)
     productFilter = ''
@@ -189,6 +198,10 @@ def home():
 @app.route('/search', methods=['GET', 'POST'])
 @app.route('/graphview', methods=['GET', 'POST'])
 def search():
+    global initvar
+    if initvar ==0:
+        setDataSet()
+        initvar = 1
     query = ''
     form = SearchForm(csrf_enabled=False)
     productFilter = ''
@@ -622,12 +635,14 @@ def getAssociationDetails(id):
     if data['IBM_Partner_ID'].iloc[0] != '' :
         prodList = getIBMProdDet(id)
         certList = getIBMCertDet(id)
+        PType = getIBMPTypeAreaDet(id)
+        SolnArea = getIBMSolnAreaDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>IBM</b></font></td> <td>')
-        htmlText = htmlText + '' + '</td><td>' # Product & Services
+        htmlText = htmlText + SolnArea + '</td><td>' # Product & Services
         htmlText = htmlText + '-' + '</td><td>' # Specialization
         htmlText = htmlText + certList +  str('</td><td>') # Certification
         htmlText = htmlText +   prodList  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  '-'   + str('</td></tr>') # Partnership Level
+        htmlText = htmlText +  PType   + str('</td></tr>') # Partnership Level
 
     if data['MS_Partner_ID'].iloc[0] != '' :
         CDet = getMSAssDet(id)
@@ -941,17 +956,44 @@ def getIBMSolnAreaDet(id):
         row = cur.fetchone()
     cur.close()
     
-    query = "SELECT SolutionArea from ibm_partner_certifications  where id like '" + IBM_Id +"' ;"
+    query = "SELECT SolutionArea from ibm_partner_solutionarea  where id like '" + IBM_Id +"' ;"
     
-    ibm_partner_cert=pd.read_sql(query, cnx)
+    SolutionAreapd=pd.read_sql(query, cnx)
     cnx.close()
-    Brand_Productlist = ibm_partner_cert.Brand_Product.unique().tolist()
-    result_list = ''
-    for i in Brand_Productlist:
-        result_list = result_list + '<b>' + str(i) + '</b>' + cleanList(str(list(ibm_partner_cert.Certification[ibm_partner_cert.Brand_Product == i]))) 
+    SolnArealist = SolutionAreapd.SolutionArea.unique().tolist()
+    result_list = '<b>Solution Area :</b><ul>'
+    for i in SolnArealist:
+        result_list = result_list + '<li>' + str(i) + '</li>' 
+    result_list = result_list + '</ul>'
     return result_list
 
 
+
+
+
+
+def getIBMPTypeAreaDet(id):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    cur = cnx.cursor()
+    cur.execute(query)
+    row = cur.fetchone()
+    IBM_Id = ''
+    while row is not None:
+        IBM_Id =  row[0]
+        row = cur.fetchone()
+    cur.close()
+    
+    query = "SELECT BusinessPartnerType from ibm_partner_type  where id like '" + IBM_Id +"' ;"
+    
+    ibm_partnertype =pd.read_sql(query, cnx)
+    cnx.close()
+    PTypelist = ibm_partnertype.BusinessPartnerType.unique().tolist()
+    result_list = '<b>Partner Type :</b><ul>'
+    for i in PTypelist:
+        result_list = result_list + '<li>' + str(i) + '</li>' 
+    result_list = result_list + '</ul>'
+    return result_list
 
 
 
@@ -1179,6 +1221,10 @@ def getCitrixAssDet(id):
 
 @app.route('/mapview' , methods=['GET', 'POST'])
 def mapview():
+    global initvar
+    if initvar ==0:
+        setDataSet()
+        initvar = 1
     form = SearchForm(csrf_enabled=False)
     query = ''
     productFilter = ''

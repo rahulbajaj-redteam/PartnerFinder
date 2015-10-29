@@ -23,23 +23,23 @@ import pandasql as pdsql
 
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
-PTT_Dataset = pd.DataFrame()
-initvar = 0
+#PTT_Dataset = pd.DataFrame()
+#initvar = 0
 #cnx1 = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
 #squery = "SELECT * from rhpartners.pttv1 ;"
 #PTT_Dataset = pd.read_sql(squery,cnx1)    
 #cnx1.close()
     
     
-def setDataSet():
-    global PTT_Dataset
-    if PTT_Dataset.shape[0]>90000:
-        pass
-    else:
-        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-        squery = "SELECT * from rhpartners.pttv1 ;"
-        PTT_Dataset = pd.read_sql(squery,cnx)    
-        cnx.close()
+#def setDataSet():
+#    global PTT_Dataset
+#    if PTT_Dataset.shape[0]>90000:
+#        pass
+#    else:
+#        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+#        squery = "SELECT * from rhpartners.pttv1 ;"
+#        PTT_Dataset = pd.read_sql(squery,cnx)    
+#        cnx.close()
     
 
 
@@ -72,10 +72,10 @@ def gdrive():
 @app.route('/', methods= ['GET', 'POST'])
 @app.route('/reset', methods= ['GET', 'POST'])
 def home():
-    global initvar
-    if initvar ==0:
-        setDataSet()
-        initvar = 1
+#    global initvar
+#    if initvar ==0:
+#        setDataSet()
+#        initvar = 1
         
     query = ''
     form = SearchForm(csrf_enabled=False)
@@ -198,10 +198,10 @@ def home():
 @app.route('/search', methods=['GET', 'POST'])
 @app.route('/graphview', methods=['GET', 'POST'])
 def search():
-    global initvar
-    if initvar ==0:
-        setDataSet()
-        initvar = 1
+#    global initvar
+#    if initvar ==0:
+#        setDataSet()
+#        initvar = 1
     query = ''
     form = SearchForm(csrf_enabled=False)
     productFilter = ''
@@ -1221,10 +1221,10 @@ def getCitrixAssDet(id):
 
 @app.route('/mapview' , methods=['GET', 'POST'])
 def mapview():
-    global initvar
-    if initvar ==0:
-        setDataSet()
-        initvar = 1
+#    global initvar
+#    if initvar ==0:
+#        setDataSet()
+#        initvar = 1
     form = SearchForm(csrf_enabled=False)
     query = ''
     productFilter = ''
@@ -1355,14 +1355,18 @@ def getBubbleList():
 
 
 def getDonutList(queryclause):
-    pysql = lambda q: pdsql.sqldf(q, globals())
-    str1 = "select * from  PTT_Dataset where " + queryclause + " ;"
-    ResultDS = pysql(str1)
-    PTT_Dataset_Agg = ResultDS.ix[:,72:84]
-    PTT_Dataset_Agg = pd.DataFrame(PTT_Dataset_Agg.sum())
-    PTT_Dataset_Agg.index.name = 'Product'
-    PTT_Dataset_Agg.reset_index(inplace=True)
-    df = pd.DataFrame(PTT_Dataset_Agg.values.tolist())
+    query = "SELECT sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics)as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_CRM) as CRM,sum(Prod_SCM) as SCM,sum(Prod_Security) as Security FROM `rhpartners`.`ptt`;"
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    data = pd.read_sql(query,cnx) 
+    cnx.close()
+    if data is None:
+        return ''
+    Prod_df = pd.DataFrame(data.transpose())
+    Prod_df.index.name = 'Product'
+    Prod_df.reset_index(inplace=True)
+    Prod_df.values.tolist()
+    
+    df = pd.DataFrame(Prod_df.values.tolist())
     x = df
     x = pd.DataFrame(x)
     DonutList = []
@@ -1393,6 +1397,10 @@ def getBubbleJson(country_req):
       
         
 
+def getRegionRHPartnerBarData(queryclause):
+    query = "SELECT GeoRegion,RH_Partner,Count(RH_Partner) from  PTT_Dataset where " + queryclause + "  Group By GeoRegion,RH_Partner;"
+    
+    return 0 
 
 
 
@@ -1565,26 +1573,7 @@ def tmapview():
 @app.route('/graphview', methods=['GET', 'POST'])
 def graphview():
     form = SearchForm(csrf_enabled=False)
-#    results = graph.cypher.execute(
-#        "MATCH (m:Movie)<-[:ACTED_IN]-(a:Person) "
-#        "RETURN m.title as movie, collect(a.name) as cast "
-#        "LIMIT {limit}", {"limit": 100})
-#    nodes = []
-#    rels = []
-#    i = 0
-#    for movie, cast in results:
-#        nodes.append({"title": movie, "label": "movie"})
-#        target = i
-#        i += 1
-#        for name in cast:
-#            actor = {"title": name, "label": "actor"}
-#            try:
-#                source = nodes.index(actor)
-#            except ValueError:
-#                nodes.append(actor)
-#                source = i
-#                i += 1
-#            rels.append({"source": source, "target": target})
+
     return render_template('result.html', form=form )
 
 
@@ -1674,12 +1663,7 @@ def PWeb(url):
 
 
 def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req,RH_Partner_req):
-#    if CISCO_Partner_req == ['1']:
-#         if len(query)<5:
-#             query = query + ' Cisco_Partner_Flag = 1 and Cisco_Ctry_Partner_Flag = 1' 
-#         else:
-#             query = str(query) + ' and ' +  ' Cisco_Partner_Flag = 1 and Cisco_Ctry_Partner_Flag = 1' 
-    
+   
     if CISCO_Partner_req == ['1']:
          if len(query)<5:
              query = query + ' Cisco_Partner_Flag = 1 and Cisco_Ctry_Partner_Flag = 1' 
@@ -1764,14 +1748,14 @@ def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,De
                  
                  
 def getPartners(queryclause):
-    pysql = lambda q: pdsql.sqldf(q, globals())
-    str1 = "select Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from  PTT_Dataset where " + queryclause + "Order By Coordinates desc LIMIT 250 ;"
-    ResultDS = pysql(str1)
+#    pysql = lambda q: pdsql.sqldf(q, globals())
+#    str1 = "select Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from  PTT_Dataset where " + queryclause + "Order By Coordinates desc LIMIT 250 ;"
+#    ResultDS = pysql(str1)
 #    if len(queryclause)>25:
 #        dfquery = '(' + queryclause + ')'
 #        if str(dfquery).find('and') >0:    
-            #dfquery = str(dfquery).replace('and' , ' ) and ( ')
-            #dfquery = str(dfquery).replace('"' , '')
+#            dfquery = str(dfquery).replace('and' , ' ) and ( ')
+#            dfquery = str(dfquery).replace('"' , '')
 #    if len(dfquery)>7: 
 #        if dfquery.startswith('"') and dfquery.endswith('"'):
 #            dfquery = dfquery[1:-1]
@@ -1780,22 +1764,22 @@ def getPartners(queryclause):
 #        ResultDS = PTT_Dataset
 #    else:
 #        ResultDS = PTT_Dataset
-    ResultDS = ResultDS[['Name','GeoCountry','GeoRegion','Partner_Url','id','Coordinates']]
-    ResultDS = ResultDS.sort(['Coordinates'], ascending=False)
-    ResultDS = ResultDS.head(250)
-    return ResultDS
-#    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-#    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.ptt "
-#    
-#    if len(queryclause)>5:        
-#        query = query + 'WHERE ' + str(queryclause) + ' Order by Coordinates desc LIMIT 250;'     
-#    else:
-#        query = query + ' Order by Coordinates desc LIMIT 250 ;'
-#    data = pd.read_sql(query,cnx)
-#    
-#    if data is None:
-#        return "Username or Password is wrong"
-#    return data
+#    ResultDS = ResultDS[['Name','GeoCountry','GeoRegion','Partner_Url','id','Coordinates']]
+#    ResultDS = ResultDS.sort(['Coordinates'], ascending=False)
+#    ResultDS = ResultDS.head(250)
+#    return ResultDS
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.ptt "
+    
+    if len(queryclause)>5:        
+        query = query + 'WHERE ' + str(queryclause) + ' Order by Coordinates desc LIMIT 250;'     
+    else:
+        query = query + ' Order by Coordinates desc LIMIT 250 ;'
+    data = pd.read_sql(query,cnx)
+    
+    if data is None:
+        return "Username or Password is wrong"
+    return data
 
 
 
@@ -1811,27 +1795,27 @@ def getPartnersLoc(queryclause):
 #            ResultDS = PTT_Dataset
 #    else:
 #        ResultDS = PTT_Dataset
-    pysql = lambda q: pdsql.sqldf(q, globals())
-    str1 = "select GeoCountry  from  PTT_Dataset where " + queryclause + " ;"
-    ResultDS = pysql(str1)
-    df = pd.DataFrame(ResultDS.GeoCountry.value_counts())
-    df.index.name = 'GeoCountry'
-    df.reset_index(inplace=True)
-    df.columns = ['GeoCountry','Count']
-    return df
-#    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-#    query = "SELECT GeoCountry,Count(*) AS Count from rhpartners.ptt "
-#    
-#    if len(queryclause)>5:        
-#        query = query + 'WHERE ' + str(queryclause) + ' GROUP BY GeoCountry;'     
-#    else:
-#        query = query + '  GROUP BY GeoCountry;'
-#    
-#    data = pd.read_sql(query,cnx)
-#    
-#    if data is None:
-#        return "Username or Password is wrong"
-#    return data
+#    pysql = lambda q: pdsql.sqldf(q, globals())
+#    str1 = "select GeoCountry  from  PTT_Dataset where " + queryclause + " ;"
+#    ResultDS = pysql(str1)
+#    df = pd.DataFrame(ResultDS.GeoCountry.value_counts())
+#    df.index.name = 'GeoCountry'
+#    df.reset_index(inplace=True)
+#    df.columns = ['GeoCountry','Count']
+#    return df
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT GeoCountry,Count(*) AS Count from rhpartners.ptt "
+    
+    if len(queryclause)>5:        
+        query = query + 'WHERE ' + str(queryclause) + ' GROUP BY GeoCountry;'     
+    else:
+        query = query + '  GROUP BY GeoCountry;'
+    
+    data = pd.read_sql(query,cnx)
+    
+    if data is None:
+        return "Username or Password is wrong"
+    return data
 
 
 def getProductFilter(prod_req):

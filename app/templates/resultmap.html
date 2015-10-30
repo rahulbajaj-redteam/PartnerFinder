@@ -8,7 +8,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="/static/css/bg.css">
-<link rel="stylesheet" href="/static/css/normalize.css">
+  <link rel="stylesheet" href="/static/css/normalize.css">
   <meta charset="utf-8">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
@@ -21,17 +21,17 @@
   
     google.load('visualization', '1', { 'packages': ['geochart'] });
     google.load('visualization', '1', {packages:['corechart']});
+    google.load("visualization", "1", {packages:["imagebarchart"]});
+
     google.setOnLoadCallback(drawMap);
     google.setOnLoadCallback(drawBubbleChart);
     google.setOnLoadCallback(drawDonut);
-
+    google.setOnLoadCallback(drawRegionBarChart);
 
 
     function drawMap() {
     var data = google.visualization.arrayToDataTable({{dfmap|safe}});
-    var options = {
-    
-    };
+    var options = { };
     
     options['colorAxis'] = {minValue: 0,  colors: ['#ddeef8', '#a3d6fb','#0078c0', '#ffe04e', '#f8931f', '#d54215',]};
     var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
@@ -49,18 +49,21 @@
 
         var options = {
           title: 'Potential Red Hat Partners By Product/Specialisation',
-          pieHole: 0.6,
+          pieHole: 0.4,
           chartArea: {top:40, left:10, height:'90%', width:'100%'}
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('donut_div'));
         chart.draw(data, options);
-      }
+      };
 
 
 
 
-    
+
+
+
+
     
     function drawBubbleChart() {
 
@@ -94,7 +97,9 @@
               myChart.addSeries("GeoCountry", dimple.plot.bubble);
               myChart.addLegend(90, 0, 510, 50, "right");
               myChart.draw();
-        }
+        };
+
+
 
     function drawRingChart()
         {
@@ -107,10 +112,66 @@
               var myChart = new dimple.chart(svg, JSONdata);            
               myChart.addMeasureAxis("p", "Count");
               var ring = myChart.addSeries("Prod_Type", dimple.plot.pie);
-              ring.innerRadius = "80%";
+              ring.innerRadius = "30%";
               myChart.addLegend(500, 20, 90, 300, "left");
               myChart.draw();
-        }
+        };
+
+
+
+        function drawRegionBarChart()
+        {
+            var data = google.visualization.arrayToDataTable({{RegionBarList|safe}});
+            
+                  var options = {
+                    width: 600,
+                    height: 400,
+                    legend: { position: 'top', maxLines: 3 },
+                    bar: { groupWidth: '75%' },
+                    isStacked: true
+                  };
+
+            var chart = new google.visualization.BarChart(document.getElementById("barcharts"));
+         
+            var view = new google.visualization.DataView(data);
+              view.setColumns([0, 1,
+                       2,
+                       { calc: "stringify",
+                         sourceColumn: 2,
+                         type: "string",
+                         role: "annotation" }]);
+           chart.draw(view, options);
+        };
+
+
+
+
+        function drawProductBarChart()
+        {
+            var data = google.visualization.arrayToDataTable({{RegionBarList|safe}});
+            
+                  var options = {
+                    width: 600,
+                    height: 400,
+                    legend: { position: 'top', maxLines: 3 },
+                    bar: { groupWidth: '75%' },
+                    isStacked: true
+                  };
+
+            var chart = new google.visualization.BarChart(document.getElementById("barcharts"));
+         
+            var view = new google.visualization.DataView(data);
+              view.setColumns([0, 1,
+                       2,
+                       { calc: "stringify",
+                         sourceColumn: 2,
+                         type: "string",
+                         role: "annotation" }]);
+           chart.draw(view, options);
+        };
+
+
+
 
   </script>
 
@@ -118,7 +179,7 @@
 
 
 <body class="no-trans ">
-
+{{RegionBarList|safe}}
 <div style="background-color:white;">
     <div class="container-fluid">
          <div class="row">
@@ -345,27 +406,27 @@
 
 
 
-<table width = "100%">
-<tr width = "100%">
-<td width = "55%" height="40%" ><div id="chart_div"></div>
+
+<table width = "95%">
+<tr width = "95%">
+
+<td width = "80%" height="55%" >
+        <div id="chart_div"></div>
 </td>
-<td width = "40%">
-    <table width = "100%">
-            <tr>
-            <td><div id="bubble_div"  ></div></td>
-            </tr>
-            <tr>
-            <td><div  id="donut_div"></div></td>
-            </tr>
-    </table>
+
+<td width = "20%">
+        <table>
+                <tr>
+                        <td>a</td>
+                        <td>b</td>
+                <tr>    
 </td>
 </tr>
 </table>
 
-
-
-
-                      
+<div  id="donut_div"></div>
+<div id="bubble_div"></div>
+<div id="barcharts"></div>
 </body>
 
 </html>

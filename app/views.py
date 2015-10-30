@@ -1331,8 +1331,24 @@ def mapview():
 
     DonutList = getDonutList(query)
 
+    x = getRegionRHPartnerBarData(query,region_req)
+    x = pd.DataFrame(x)
+    x=x[0::]
+    BarList = []
+    BarList.append(['Region','RHPartner','NonRHPartner'])
+    
+    for j in range(0,len(x.ix[:,:])):
+        if x.shape[1]==2:
+           x.ix[j,2] = 0 
+        BarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2])  ])      
 
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList)
+
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList)
+
+
+
+
+
 
 
 
@@ -1352,6 +1368,12 @@ def getBubbleList():
     result = pd.concat([resultset.Country_Code,resultset.Diamond_Gold_Partners_Count,resultset.AverageRating,resultset.Country,resultset.PartnerCount],axis=1)
     return result
     
+
+
+
+
+
+
 
 
 def getDonutList(queryclause):
@@ -1379,6 +1401,11 @@ def getDonutList(queryclause):
 
 
 
+
+
+
+
+
 def getBubbleJson(country_req):
     query = 'SELECT GeoCountry,Count(*) AS NumberOfPartners,avg(Avg_Level) as AvgRating , Avg_Level*Count(*) AS NOA from rhpartners.ptt '
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
@@ -1395,12 +1422,81 @@ def getBubbleJson(country_req):
         d1 = data.to_json(orient='records')
         return d1
       
+      
+      
+      
+      
+      
         
 
-def getRegionRHPartnerBarData(queryclause):
-    query = "SELECT GeoRegion,RH_Partner,Count(RH_Partner) from  PTT_Dataset where " + queryclause + "  Group By GeoRegion,RH_Partner;"
-    
-    return 0 
+def getRegionRHPartnerBarData(queryclause,region_req):
+    result = DataFrame()
+    try:
+        
+        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+        if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
+            query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+            ResultDS_NonRH = pd.read_sql(query,cnx)
+            ResultDS_NonRH.columns = ['GeoRegion','NonRH_Partner']
+            query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+            ResultDS_RH = pd.read_sql(query,cnx)
+            ResultDS_RH.columns = ['GeoRegion','RH_Partner']
+            result=pd.concat([ResultDS_RH.GeoRegion,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+        elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
+            query = "Select GeoCountry, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' group by GeoCountry order by 2 desc LIMIT 5 ;"
+            ResultDS_Country = pd.read_sql(query,cnx)
+            ResultDS_Country.columns = ['GeoCountry','Partner']
+            Clist = ResultDS_Country.GeoCountry.values.tolist()
+            list = ''
+            for j in Clist:
+                list = list + "','" + str(j)        
+            list = list[2:] + "'"
+            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") Group By GeoCountry,RH_Partner;"
+            ResultDS_NonRH = pd.read_sql(query,cnx)
+            ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
+            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " and GeoCountry in (" + str(list) + ") Group By GeoCountry,RH_Partner;"
+            ResultDS_RH = pd.read_sql(query,cnx)
+            ResultDS_RH.columns = ['GeoCountry','RH_Partner']
+            result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+        elif str(queryclause).find('GeoCountry') > 0:
+            query = "Select GeoCountry, count(*) from pttv1 WHERE " + queryclause  +" group by GeoCountry order by 2 desc LIMIT 5 ;"
+            ResultDS_Country = pd.read_sql(query,cnx)
+            ResultDS_Country.columns = ['GeoCountry','Partner']
+            Clist = ResultDS_Country.GeoCountry.values.tolist()
+            list = ''
+            for j in Clist:
+                list = list + "','" + str(j)        
+            list = list[2:] + "'"
+            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " Group By GeoCountry,RH_Partner;"
+            ResultDS_NonRH = pd.read_sql(query,cnx)
+            ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
+            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " Group By GeoCountry,RH_Partner;"
+            ResultDS_RH = pd.read_sql(query,cnx)
+            ResultDS_RH.columns = ['GeoCountry','RH_Partner']
+            result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+    except:
+        result = DataFrame()
+    cnx.close()
+    return result.values.tolist() 
+
+
+
+
+
+
+
+
+def getProdRHPartnerBarData(queryclause):
+    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+    query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+    ResultDS_NonRH = pd.read_sql(query,cnx)
+    ResultDS_NonRH.columns = ['GeoRegion','NonRH_Partner']
+    query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+    ResultDS_RH = pd.read_sql(query,cnx)
+    ResultDS_RH.columns = ['GeoRegion','RH_Partner']
+    result=pd.concat([ResultDS_RH.GeoRegion,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+    cnx.close()
+    return result.values.tolist() 
 
 
 

@@ -33,7 +33,7 @@
     var data = google.visualization.arrayToDataTable({{dfmap|safe}});
     var options = { };
     
-    options['colorAxis'] = {minValue: 0,  colors: ['#ddeef8', '#a3d6fb','#0078c0', '#ffe04e', '#f8931f', '#d54215',]};
+    options['colorAxis'] = {minValue: 0,  colors: [ '#ffe5e5', '#ff9999','#ff4c4c','#e50000','#990000']};
     var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
     chart.draw(data, options);
     drawBubbleChart();
@@ -49,8 +49,8 @@
 
         var options = {
           title: 'Potential Red Hat Partners By Product/Specialisation',
-          pieHole: 0.4,
-          chartArea: {top:40, left:10, height:'90%', width:'100%'}
+          pieHole: 0.3,
+          chartArea: {top:20, left:10, height:'100%', width:'100%'}
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('donut_div'));
@@ -73,7 +73,7 @@
         hAxis: {title: 'Diamond_Gold_Partners_Count'},
         vAxis: {title: 'AverageRating'},
         bubble: {textStyle: {fontSize: 11}},
-        chartArea: {top:20, left:25, height:'80%', width:'75%'} 
+        chartArea: {top:20, left:35, height:'70%', width:'65%'} 
       };
       var chart = new google.visualization.BubbleChart(document.getElementById('bubble_div'));
       chart.draw(data, options);
@@ -179,7 +179,7 @@
 
 
 <body class="no-trans ">
-{{RegionBarList|safe}}
+
 <div style="background-color:white;">
     <div class="container-fluid">
          <div class="row">
@@ -408,25 +408,32 @@
 
 
 <table width = "95%">
-<tr width = "95%">
-
-<td width = "80%" height="55%" >
-        <div id="chart_div"></div>
-</td>
-
-<td width = "20%">
-        <table>
-                <tr>
-                        <td>a</td>
-                        <td>b</td>
-                <tr>    
-</td>
-</tr>
+    <tr width = "95%">
+            <td width = "80%" height="55%" >
+                    <div id="chart_div"></div>
+            </td>
+    
+    </tr>
+    <tr width = "95%">
+    
+            <td width = "80%" >
+                  
+            <div id="barcharts"></div>
+            </td>
+    </tr>
+    <tr width = "95%">      
+            <td width = "90%" >            
+            <div  id="donut_div"></div>
+            </td>
+    
+    </tr>
+    <tr width = "95%">       
+            <td width = "80%"  >                
+            <div id="bubble_div"></div>
+            </td>           
+    </tr>
 </table>
 
-<div  id="donut_div"></div>
-<div id="bubble_div"></div>
-<div id="barcharts"></div>
 </body>
 
 </html>

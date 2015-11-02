@@ -330,7 +330,7 @@ def ToggleRH1(id):
 
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     cursor = cnx.cursor()
-    update_query = "update RHPartners.ptt set RH_Partner_Match_Flag = 1 , RH_Partner_ID = 'CorrectedByUser',RH_Partner =1  where id = CONCAT('', %s, '');"
+    update_query = "update RHPartners.pttv1 set RH_Partner_Match_Flag = 1 , RH_Partner_ID = 'CorrectedByUser',RH_Partner =1  where id = CONCAT('', %s, '');"
     cursor.execute(update_query,(str(id),))
     cnx.commit()              
 
@@ -410,7 +410,7 @@ def ToggleRH0(id):
     try:
         cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
         cursor = cnx.cursor()
-        update_query = "update RHPartners.ptt set RH_Partner_Match_Flag = 0 , RH_Partner =0  where id = CONCAT('', %s, '')"
+        update_query = "update RHPartners.pttv1 set RH_Partner_Match_Flag = 0 , RH_Partner =0  where id = CONCAT('', %s, '')"
         cursor.execute(update_query,(str(id),))
         cnx.commit()
 
@@ -572,7 +572,7 @@ def PDetails(id):
 
 def getAssociationDetails(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT VMWare_Partner_ID,MS_Partner_ID,SAP_Partner_ID,Oracle_Partner_ID,Dell_Partner_ID,Citrix_Partner_ID,RH_Partner_ID,IBM_Partner_ID,Cisco_Partner_ID  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT VMWare_Partner_ID,MS_Partner_ID,SAP_Partner_ID,Oracle_Partner_ID,Dell_Partner_ID,Citrix_Partner_ID,RH_Partner_ID,IBM_Partner_ID,Cisco_Partner_ID  from rhpartners.pttv1 where id =" + id +" ;"
     data = pd.read_sql(query,cnx)    
     cnx.close()
     if data is None:
@@ -711,7 +711,7 @@ def getAssociationDetails(id):
 
 def getPAttributes(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Services_Partner,Global_Partner,Business_Process_Outsourcing_Partner,Ind_Banking,Ind_Computer_Services,Ind_Education,Ind_Electronics,`Ind_Energy&Utilities`,Ind_FinancialMarkets,Ind_Public_Sector,Ind_Healthcare,Ind_IndustrialProducts,Ind_Insurance,Ind_ProfessionalServices,Ind_Retail,Ind_Telecommunications,`Ind_WholesaleDistribution&Services`,Ind_Automotive,Ind_ConsumerProducts,`Ind_Media&Entertainment`,`Ind_Travel&Transportation`,`Ind_Chemicals&Petroleum`,Ind_LifeSciences,`Ind_Aerospace&Defense`,`Ind_EngineeringandConstruction`  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT Services_Partner,Global_Partner,Business_Process_Outsourcing_Partner,Ind_Banking,Ind_Computer_Services,Ind_Education,Ind_Electronics,`Ind_Energy&Utilities`,Ind_FinancialMarkets,Ind_Public_Sector,Ind_Healthcare,Ind_IndustrialProducts,Ind_Insurance,Ind_ProfessionalServices,Ind_Retail,Ind_Telecommunications,`Ind_WholesaleDistribution&Services`,Ind_Automotive,Ind_ConsumerProducts,`Ind_Media&Entertainment`,`Ind_Travel&Transportation`,`Ind_Chemicals&Petroleum`,Ind_LifeSciences,`Ind_Aerospace&Defense`,`Ind_EngineeringandConstruction`  from rhpartners.pttv1 where id =" + id +" ;"
     data = pd.read_sql(query,cnx) 
     cnx.close()
     if data is None:
@@ -724,7 +724,7 @@ def getPAttributes(id):
 
 def getPartnerDetail(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,RH_Partner_ID,RH_Partner_Tier,Addr_Line1,Addr_Line2,Addr_Line3,Addr_City,Addr_State,Addr_PostCode,Phone1,Phone1_Extn,Phone2,Fax,Email1,Email2,Overview,YearEstablished,RH_Partner  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,RH_Partner_ID,RH_Partner_Tier,Addr_Line1,Addr_Line2,Addr_Line3,Addr_City,Addr_State,Addr_PostCode,Phone1,Phone1_Extn,Phone2,Fax,Email1,Email2,Overview,YearEstablished,RH_Partner  from rhpartners.pttv1 where id =" + id +" ;"
     data = pd.read_sql(query,cnx) 
     cnx.close()
     if data is None:
@@ -735,7 +735,7 @@ def getPartnerDetail(id):
 
 def getCompAssociationDetails(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT VMWare_Partner_ID,MS_Partner_ID,SAP_Partner_ID,Oracle_Partner_ID,Dell_Partner_ID,Citrix_Partner_ID,RH_Partner_ID,IBM_Partner_ID,Cisco_Partner_ID  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT VMWare_Partner_ID,MS_Partner_ID,SAP_Partner_ID,Oracle_Partner_ID,Dell_Partner_ID,Citrix_Partner_ID,RH_Partner_ID,IBM_Partner_ID,Cisco_Partner_ID  from rhpartners.pttv1 where id =" + id +" ;"
     data = pd.read_sql(query,cnx)    
     cnx.close()
     if data is None:
@@ -922,7 +922,7 @@ def getCompAssociationDetails(id):
 
 def getIBMProdDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT IBM_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -946,7 +946,7 @@ def getIBMProdDet(id):
 
 def getIBMSolnAreaDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT IBM_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -974,7 +974,7 @@ def getIBMSolnAreaDet(id):
 
 def getIBMPTypeAreaDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT IBM_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1003,7 +1003,7 @@ def getIBMPTypeAreaDet(id):
 
 def getIBMCertDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT IBM_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT IBM_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1045,7 +1045,7 @@ def cleanList(listItem):
 
 def getSAPAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT SAP_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT SAP_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1073,7 +1073,7 @@ def getSAPAssDet(id):
 
 def getDellAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Dell_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT Dell_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1100,7 +1100,7 @@ def getDellAssDet(id):
 
 def getVMWareAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT VMWare_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT VMWare_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1125,7 +1125,7 @@ def getVMWareAssDet(id):
 
 def getOracleAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Oracle_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT Oracle_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1149,7 +1149,7 @@ def getOracleAssDet(id):
 
 def getMSAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT MS_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT MS_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1175,7 +1175,7 @@ def getMSAssDet(id):
 
 def getCiscoAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Cisco_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT Cisco_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1197,7 +1197,7 @@ def getCiscoAssDet(id):
 
 def getCitrixAssDet(id):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Citrix_Partner_Id  from rhpartners.ptt where id =" + id +" ;"
+    query = "SELECT Citrix_Partner_Id  from rhpartners.pttv1 where id =" + id +" ;"
     cur = cnx.cursor()
     cur.execute(query)
     row = cur.fetchone()
@@ -1407,7 +1407,7 @@ def getDonutList(queryclause):
 
 
 def getBubbleJson(country_req):
-    query = 'SELECT GeoCountry,Count(*) AS NumberOfPartners,avg(Avg_Level) as AvgRating , Avg_Level*Count(*) AS NOA from rhpartners.ptt '
+    query = 'SELECT GeoCountry,Count(*) AS NumberOfPartners,avg(Avg_Level) as AvgRating , Avg_Level*Count(*) AS NOA from rhpartners.pttv1 '
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     if country_req != 'Any' :
         query = query + ' where GeoCountry = "' + str(country_req) + '"'
@@ -1435,15 +1435,15 @@ def getRegionRHPartnerBarData(queryclause,region_req):
         
         cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
         if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
-            query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+            query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
             ResultDS_NonRH = pd.read_sql(query,cnx)
             ResultDS_NonRH.columns = ['GeoRegion','NonRH_Partner']
-            query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+            query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
             ResultDS_RH = pd.read_sql(query,cnx)
             ResultDS_RH.columns = ['GeoRegion','RH_Partner']
             result=pd.concat([ResultDS_RH.GeoRegion,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
         elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
-            query = "Select GeoCountry, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' group by GeoCountry order by 2 desc LIMIT 5 ;"
+            query = "Select GeoCountry, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
             ResultDS_Country = pd.read_sql(query,cnx)
             ResultDS_Country.columns = ['GeoCountry','Partner']
             Clist = ResultDS_Country.GeoCountry.values.tolist()
@@ -1451,15 +1451,15 @@ def getRegionRHPartnerBarData(queryclause,region_req):
             for j in Clist:
                 list = list + "','" + str(j)        
             list = list[2:] + "'"
-            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") Group By GeoCountry,RH_Partner;"
+            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry,RH_Partner;"
             ResultDS_NonRH = pd.read_sql(query,cnx)
             ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
-            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " and GeoCountry in (" + str(list) + ") Group By GeoCountry,RH_Partner;"
+            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + " and GeoCountry in (" + str(list) + ")  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
             ResultDS_RH = pd.read_sql(query,cnx)
             ResultDS_RH.columns = ['GeoCountry','RH_Partner']
             result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
         elif str(queryclause).find('GeoCountry') > 0:
-            query = "Select GeoCountry, count(*) from pttv1 WHERE " + queryclause  +" group by GeoCountry order by 2 desc LIMIT 5 ;"
+            query = "Select GeoCountry, count(*) from pttv1 WHERE " + queryclause  +"  And GeoCountry not like 'Unknown'  group by GeoCountry order by 2 desc LIMIT 5 ;"
             ResultDS_Country = pd.read_sql(query,cnx)
             ResultDS_Country.columns = ['GeoCountry','Partner']
             Clist = ResultDS_Country.GeoCountry.values.tolist()
@@ -1467,10 +1467,10 @@ def getRegionRHPartnerBarData(queryclause,region_req):
             for j in Clist:
                 list = list + "','" + str(j)        
             list = list[2:] + "'"
-            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " Group By GeoCountry,RH_Partner;"
+            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
             ResultDS_NonRH = pd.read_sql(query,cnx)
             ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
-            query = "SELECT GeoCountry,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " Group By GeoCountry,RH_Partner;"
+            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
             ResultDS_RH = pd.read_sql(query,cnx)
             ResultDS_RH.columns = ['GeoCountry','RH_Partner']
             result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
@@ -1488,10 +1488,10 @@ def getRegionRHPartnerBarData(queryclause,region_req):
 
 def getProdRHPartnerBarData(queryclause):
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 0 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+    query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + " Group By GeoRegion,RH_Partner;"
     ResultDS_NonRH = pd.read_sql(query,cnx)
     ResultDS_NonRH.columns = ['GeoRegion','NonRH_Partner']
-    query = "SELECT GeoRegion,Count(RH_Partner) from  ptt Where RH_Partner = 1 and " + queryclause + " Group By GeoRegion,RH_Partner;"
+    query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + " Group By GeoRegion,RH_Partner;"
     ResultDS_RH = pd.read_sql(query,cnx)
     ResultDS_RH.columns = ['GeoRegion','RH_Partner']
     result=pd.concat([ResultDS_RH.GeoRegion,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
@@ -1526,7 +1526,7 @@ def getIRingJson(country_req):
         
 
 def getORingJson(country_req):
-    query = 'SELECT sum(Prod_Platforms) as Prod_Platforms,sum(Prod_Virtualization) as Prod_Virtualization,sum(Prod_Cloud) as Prod_Cloud ,sum(Prod_Storage) as Prod_Storage ,sum(Prod_Middleware) as Prod_Middleware,sum(Prod_Analytics) as Prod_Analytics,sum(Prod_IoT) as Prod_IoT,sum(Prod_DataManagement) as Prod_DataManagement,sum(Prod_Mobility) as Prod_Mobility,sum(Prod_SCM) as Prod_SCM, sum(Prod_CRM) as Prod_CRM,sum(Prod_Security) as Prod_Security, sum(Prod_Platforms)+sum(Prod_Virtualization)+sum(Prod_Cloud)+sum(Prod_Storage)+sum(Prod_Middleware)+sum(Prod_Analytics)+sum(Prod_IoT)+sum(Prod_DataManagement)+sum(Prod_Mobility)+sum(Prod_SCM)+ sum(Prod_CRM)+sum(Prod_Security) as total from rhpartners.ptt '
+    query = 'SELECT sum(Prod_Platforms) as Prod_Platforms,sum(Prod_Virtualization) as Prod_Virtualization,sum(Prod_Cloud) as Prod_Cloud ,sum(Prod_Storage) as Prod_Storage ,sum(Prod_Middleware) as Prod_Middleware,sum(Prod_Analytics) as Prod_Analytics,sum(Prod_IoT) as Prod_IoT,sum(Prod_DataManagement) as Prod_DataManagement,sum(Prod_Mobility) as Prod_Mobility,sum(Prod_SCM) as Prod_SCM, sum(Prod_CRM) as Prod_CRM,sum(Prod_Security) as Prod_Security, sum(Prod_Platforms)+sum(Prod_Virtualization)+sum(Prod_Cloud)+sum(Prod_Storage)+sum(Prod_Middleware)+sum(Prod_Analytics)+sum(Prod_IoT)+sum(Prod_DataManagement)+sum(Prod_Mobility)+sum(Prod_SCM)+ sum(Prod_CRM)+sum(Prod_Security) as total from rhpartners.pttv1 '
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     if country_req != 'Any' :
         query = query + ' where GeoCountry = "' + str(country_req) + '"'        
@@ -1865,7 +1865,7 @@ def getPartners(queryclause):
 #    ResultDS = ResultDS.head(250)
 #    return ResultDS
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.ptt "
+    query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.pttv1 "
     
     if len(queryclause)>5:        
         query = query + 'WHERE ' + str(queryclause) + ' Order by Coordinates desc LIMIT 250;'     
@@ -1900,7 +1900,7 @@ def getPartnersLoc(queryclause):
 #    df.columns = ['GeoCountry','Count']
 #    return df
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT GeoCountry,Count(*) AS Count from rhpartners.ptt "
+    query = "SELECT GeoCountry,Count(*) AS Count from rhpartners.pttv1 "
     
     if len(queryclause)>5:        
         query = query + 'WHERE ' + str(queryclause) + ' GROUP BY GeoCountry;'     

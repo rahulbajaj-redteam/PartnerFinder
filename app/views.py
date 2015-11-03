@@ -1341,9 +1341,20 @@ def mapview():
         if x.shape[1]==2:
            x.ix[j,2] = 0 
         BarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2])  ])      
+   
 
-
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList)
+    x = getRegionProdRHBarData(query,region_req)
+    x = pd.DataFrame(x)
+    ColumnBarList = []
+    ColumnBarList.append(['Geo','Platforms', 'Virtualization' ,'Cloud' ,'Storage', 'Middleware', 'Analytics' ,'IoT' ,'DataManagement' ,'Mobility' , 'SCM' ,'CRM'])
+    
+    for j in range(0,len(x.ix[:,:])):
+        ColumnBarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2]) , int(x.ix[j,3])  ,  int(x.ix[j,4]) , int(x.ix[j,5])  ,  int(x.ix[j,6]) , int(x.ix[j,7])  ,  int(x.ix[j,8]) , int(x.ix[j,9])  ,  int(x.ix[j,10]) , int(x.ix[j,11])  ])    
+        
+    
+    
+    
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList,ColumnBarList=ColumnBarList)
 
 
 
@@ -1501,14 +1512,49 @@ def getProdRHPartnerBarData(queryclause):
 
 
 
+def getRegionProdRHBarData(queryclause,region_req):
+    result = []
+    try:
+        
+        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+        if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
+            str1 = "SELECT GeoRegion,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from rhpartners.pttv1 where " + queryclause + " GeoRegion not like 'Unknown' and GeoCountry not like 'Unknown' Group By GeoRegion;"
+            result = pd.read_sql(str1, cnx)
+
+            
+        elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
+            query = "Select GeoCountry, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
+            ResultDS_Country = pd.read_sql(query,cnx)
+            ResultDS_Country.columns = ['GeoCountry','Partner']
+            Clist = ResultDS_Country.GeoCountry.values.tolist()
+            list = ''
+            for j in Clist:
+                list = list + "','" + str(j)        
+            list = list[2:] + "'"
+            query = "SELECT GeoCountry,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry;"
+            result = pd.read_sql(query,cnx)
+
+        elif str(queryclause).find('GeoCountry') > 0:
+            query = "Select GeoCountry, count(*) from pttv1 WHERE " + queryclause  +"  And GeoCountry not like 'Unknown'  group by GeoCountry order by 2 desc LIMIT 5 ;"
+            ResultDS_Country = pd.read_sql(query,cnx)
+            ResultDS_Country.columns = ['GeoCountry','Partner']
+            Clist = ResultDS_Country.GeoCountry.values.tolist()
+            list = ''
+            for j in Clist:
+                list = list + "','" + str(j)        
+            list = list[2:] + "'"
+            query = "SELECT GeoCountry,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where RH_Partner = 0 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry;"
+            result = pd.read_sql(query,cnx)
+          
+    except:
+        result = []
+    cnx.close()
+    return result
+
 
 def getIRingJson(country_req):
     query = 'SELECT Prod_Type,Count from rhpartners.ptt_partner_prod where GeoCountry like "SPAIN";'
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-#    if country_req != 'Any' :
-#        query = query + ' where GeoCountry = "' + str(country_req) + '"'
-#        
-#    query = query + " ;"
     data = pd.read_sql(query,cnx) 
     cnx.close()
     if data is None:

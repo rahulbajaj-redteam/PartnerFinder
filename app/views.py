@@ -1518,7 +1518,7 @@ def getRegionProdRHBarData(queryclause,region_req):
         
         cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
         if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
-            str1 = "SELECT GeoRegion,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from rhpartners.pttv1 where " + queryclause + " GeoRegion not like 'Unknown' and GeoCountry not like 'Unknown' Group By GeoRegion;"
+            str1 = "SELECT GeoRegion,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from rhpartners.pttv1 where " + queryclause + " and  GeoRegion not like 'Unknown' and GeoCountry not like 'Unknown' Group By GeoRegion;"
             result = pd.read_sql(str1, cnx)
 
             

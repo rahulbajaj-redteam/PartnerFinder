@@ -18,29 +18,40 @@
   <script src="/static/js/dimple.v2.1.6.js"></script>
 
    <script type="text/javascript">
-  
-    google.load('visualization', '1', { 'packages': ['geochart'] });
-    google.load('visualization', '1', {packages:['corechart']});
+
+
+
+    google.load("visualization", "1", { 'packages': ["geochart"] });
+    google.load("visualization", "1", {packages:["corechart"]});
     google.load("visualization", "1", {packages:["imagebarchart"]});
-    google.load('visualization', '1.1', { 'packages': ['bar']});
+    google.load("visualization", "1.1", { 'packages': ["bar"]});
     google.setOnLoadCallback(drawMap);
     google.setOnLoadCallback(drawBubbleChart);
     google.setOnLoadCallback(drawDonut);
     google.setOnLoadCallback(drawRegionBarChart);
-    google.setOnLoadCallback(drawRegionProdColumnChart);
+    google.setOnLoadCallback(drawRegionProdColumnChartnew);
 
 
-    function drawMap() {
-    var data = google.visualization.arrayToDataTable({{dfmap|safe}});
-    var options = { };
-    
-    options['colorAxis'] = {minValue: 0,  colors: [ '#ffe5e5', '#ff9999','#ff4c4c','#e50000','#990000']};
-    var chart = new google.visualization.GeoChart(document.getElementById('chart_div'));
-    chart.draw(data, options);
-    drawBubbleChart();
-    drawRingChart();
-   
-  };
+        
+            function drawMap() {
+            var data = google.visualization.arrayToDataTable({{dfmap|safe}});
+            var options = { };
+            
+            options['colorAxis'] = {minValue: 0,  colors: [ '#ffe5e5', '#ff9999','#ff4c4c','#e50000','#990000']};
+            var chart = new google.visualization.GeoChart(document.getElementById("one"));
+
+            chart.draw(data, options);
+            drawBubbleChart();
+            drawRingChart();
+        
+          };
+
+
+
+
+
+
+  
 
 
 
@@ -51,10 +62,10 @@
         var options = {
           title: 'Potential Red Hat Partners By Product/Specialisation',
           pieHole: 0.3,
-          chartArea: {top:20, left:10, height:'100%', width:'100%'}
+          chartArea: {top:20, left:20, height:'100%', width:'100%'}
         };
 
-        var chart = new google.visualization.PieChart(document.getElementById('donut_div'));
+        var chart = new google.visualization.PieChart(document.getElementById("two"));
         chart.draw(data, options);
       };
 
@@ -69,11 +80,9 @@
       var options = {
         title: 'Top 7 Countries with Potential Red Hat Partners',
         hAxis: {title: 'Diamond_Gold_Partners_Count'},
-        vAxis: {title: 'AverageRating'},
-        bubble: {textStyle: {fontSize: 11}},
-        chartArea: {top:20, left:35, height:'70%', width:'65%'} 
+        vAxis: {title: 'AverageRating'  }
       };
-      var chart = new google.visualization.BubbleChart(document.getElementById('bubble_div'));
+      var chart = new google.visualization.BubbleChart(document.getElementById("three"));
       chart.draw(data, options);
     };
 
@@ -126,14 +135,13 @@
             var data = google.visualization.arrayToDataTable({{RegionBarList|safe}});
             
                   var options = {
-                    width: 600,
-                    height: 400,
+                   
                     legend: { position: 'top', maxLines: 3 },
                     bar: { groupWidth: '75%' },
                     isStacked: true
                   };
 
-            var chart = new google.visualization.BarChart(document.getElementById("barcharts"));
+            var chart = new google.visualization.BarChart(document.getElementById("five"));
          
             var view = new google.visualization.DataView(data);
               view.setColumns([0, 1,
@@ -148,51 +156,23 @@
 
 
 
-
-
-        function drawProductBarChart()
-        {
-            var data = google.visualization.arrayToDataTable({{RegionBarList|safe}});
-            
-                  var options = {
-                    width: 600,
-                    height: 400,
-                    legend: { position: 'top', maxLines: 3 },
-                    bar: { groupWidth: '75%' },
-                    isStacked: true
-                  };
-
-            var chart = new google.visualization.BarChart(document.getElementById("barcharts"));
-         
-            var view = new google.visualization.DataView(data);
-              view.setColumns([0, 1,
-                       2,
-                       { calc: "stringify",
-                         sourceColumn: 2,
-                         type: "string",
-                         role: "annotation" }]);
-           chart.draw(view, options);
-        };
-
-
-
-
-
-
-        function drawRegionProdColumnChart() { 
+        function drawRegionProdColumnChartnew() { 
                 var data = google.visualization.arrayToDataTable({{ColumnBarList|safe}});
         
                 var options = {
                   chart: {
                     title: 'Product-Partner distribution by Geo',
-                    subtitle: '-',
+                    subtitle: '-'
                   }
                 };
         
-                var chart = new google.charts.Bar(document.getElementById('colchart_div'));
+                var chart = new google.charts.Bar(document.getElementById("four_ch"));
         
                 chart.draw(data, options);
             };
+
+
+
         
 
   </script>
@@ -200,7 +180,18 @@
 </head>
 
 
-<body class="no-trans ">
+<body class="no-trans"  onload="clearGraphs()" >
+<script>
+
+function clearGraphs() {
+    document.getElementById("one").style.display = "block";
+    document.getElementById("two").style.display = "none";
+    document.getElementById("three").style.display = "none";
+    document.getElementById("four").style.display = "none";
+    document.getElementById("five").style.display = "none";
+}
+</script>
+
 
 <div style="background-color:white;">
     <div class="container-fluid">
@@ -428,37 +419,128 @@
 
 
 
+<div >            
+  <ul class="pager">
+    <li class="previous"><button type="button" id="Previous" class="btn btn-default">Previous</button>
+
+             <script type="text/javascript">
+         document.getElementById("Previous").onclick = function () {                                                
+                                      
+                                                var vone = document.getElementById('one');
+                                                var vtwo = document.getElementById('two');
+                                                var vthree = document.getElementById('three');
+                                                var vfour = document.getElementById('four_ch');
+                                                var vfive = document.getElementById('five');
+                                                
+                                                if ( vone.style.display == 'block' ) {
+                                                    document.getElementById('five').style.display = 'block';
+                                                    document.getElementById('four_ch').style.display = 'none';
+                                                    document.getElementById('one').style.display = 'none';
+                                            
+                                                }      
+
+
+                                                else if ( vtwo.style.display == 'block' ) {
+                                                    document.getElementById('one').style.display = 'block';
+                                                   
+                                                    document.getElementById('two').style.display = 'none';
+                                            
+                                                }      
+
+
+                                                else if ( vthree.style.display == 'block' ) {
+                                        
+                                                    document.getElementById('two').style.display = 'block';
+                                                    document.getElementById('three').style.display = 'none';
+                                                   
+                                                }      
+
+
+                                                else if ( vfour.style.display == 'block' ) {
+                                                    document.getElementById('three').style.display = 'block';
+                                                    document.getElementById('four_ch').style.display = 'none';
+                                                }      
+
+
+                                                else if ( vfive.style.display == 'block' ) {
+                                                    document.getElementById('five').style.display = 'none';
+               
+                                                    document.getElementById('four_ch').style.display = 'block';
+                                                }    
+                                                
+                                                else
+                                                    {}  
+
+                                                };
+</script>
+
+
+    </li>
+    <li class="next"><button type="button" id="Next" class="btn btn-default">Next</button>
+    
+                        <script type="text/javascript">
+                                                document.getElementById("Next").onclick = function () {
+                                              
+                                                 var vone = document.getElementById('one');
+                                                var vtwo = document.getElementById('two');
+                                                var vthree = document.getElementById('three');
+                                                var vfour = document.getElementById('four_ch');
+                                                var vfive = document.getElementById('five');
+                                                
+                                                if ( vone.style.display == 'block' ) {
+                        
+                                                    document.getElementById('one').style.display = 'none';
+                                                    document.getElementById('two').style.display = 'block';
+
+                                                }  
+
+
+                                                else if ( vtwo.style.display == 'block' ) {
+
+                                                    document.getElementById('two').style.display = 'none';
+                                                    document.getElementById('three').style.display = 'block';
+                                        
+                                                }  
+
+
+                                                else if ( vthree.style.display == 'block' ) {
+
+                                                    document.getElementById('three').style.display = 'none';
+                                                    document.getElementById('four_ch').style.display = 'block';
+                                                }  
+
+
+                                                else if ( vfour.style.display == 'block' ) {
+                                                    document.getElementById('five').style.display = 'block';
+
+                                                    document.getElementById('four_ch').style.display = 'none';
+                                                }  
+
+
+                                                else if ( vfive.style.display == 'block' ) {
+                                                    document.getElementById('five').style.display = 'none';
+                                                    document.getElementById('one').style.display = 'block';
+
+                                                }
+                                                else
+                                                    {}            
+                                                };                         
+                        </script>
+
+</li>
+  </ul>
+</div>
 
 <table width = "95%">
     <tr width = "95%">
             <td width = "80%" height="55%" >
-                    <div id="chart_div"></div>
+                    <div id="one" ></div>
+                    <div  id="two"></div>
+                    <div id="three"></div>
+                    <div id="four_ch"></div>
+                    <div id="five"></div>
             </td>
-    
-    </tr>
-    <tr width = "95%">
-    
-            <td width = "80%" >
-                  
-            <div id="barcharts"></div>
-            </td>
-    </tr>
-    <tr width = "95%">      
-            <td width = "90%" >            
-            <div  id="donut_div"></div>
-            </td>
-    
-    </tr>
-    <tr width = "95%">       
-            <td width = "80%"  >                
-            <div id="bubble_div"></div>
-            </td>           
-    </tr>
 
-    <tr width = "95%">       
-            <td width = "80%"  >                
-            <div id="colchart_div"></div>
-            </td>           
     </tr>
 </table>
 

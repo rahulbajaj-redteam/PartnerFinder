@@ -187,7 +187,7 @@ function clearGraphs() {
     document.getElementById("one").style.display = "block";
     document.getElementById("two").style.display = "none";
     document.getElementById("three").style.display = "none";
-    document.getElementById("four").style.display = "none";
+   
     document.getElementById("five").style.display = "none";
 }
 </script>
@@ -429,12 +429,12 @@ function clearGraphs() {
                                                 var vone = document.getElementById('one');
                                                 var vtwo = document.getElementById('two');
                                                 var vthree = document.getElementById('three');
-                                                var vfour = document.getElementById('four_ch');
+                                              
                                                 var vfive = document.getElementById('five');
                                                 
                                                 if ( vone.style.display == 'block' ) {
                                                     document.getElementById('five').style.display = 'block';
-                                                    document.getElementById('four_ch').style.display = 'none';
+                                                    
                                                     document.getElementById('one').style.display = 'none';
                                             
                                                 }      
@@ -456,16 +456,11 @@ function clearGraphs() {
                                                 }      
 
 
-                                                else if ( vfour.style.display == 'block' ) {
-                                                    document.getElementById('three').style.display = 'block';
-                                                    document.getElementById('four_ch').style.display = 'none';
-                                                }      
-
 
                                                 else if ( vfive.style.display == 'block' ) {
                                                     document.getElementById('five').style.display = 'none';
                
-                                                    document.getElementById('four_ch').style.display = 'block';
+                                                    document.getElementById('three').style.display = 'block';
                                                 }    
                                                 
                                                 else
@@ -484,12 +479,13 @@ function clearGraphs() {
                                                  var vone = document.getElementById('one');
                                                 var vtwo = document.getElementById('two');
                                                 var vthree = document.getElementById('three');
-                                                var vfour = document.getElementById('four_ch');
+                                              
                                                 var vfive = document.getElementById('five');
                                                 
                                                 if ( vone.style.display == 'block' ) {
                         
                                                     document.getElementById('one').style.display = 'none';
+                                                   
                                                     document.getElementById('two').style.display = 'block';
 
                                                 }  
@@ -506,14 +502,7 @@ function clearGraphs() {
                                                 else if ( vthree.style.display == 'block' ) {
 
                                                     document.getElementById('three').style.display = 'none';
-                                                    document.getElementById('four_ch').style.display = 'block';
-                                                }  
-
-
-                                                else if ( vfour.style.display == 'block' ) {
                                                     document.getElementById('five').style.display = 'block';
-
-                                                    document.getElementById('four_ch').style.display = 'none';
                                                 }  
 
 
@@ -537,7 +526,7 @@ function clearGraphs() {
                     <div id="one" ></div>
                     <div  id="two"></div>
                     <div id="three"></div>
-                    <div id="four_ch"></div>
+                   
                     <div id="five"></div>
             </td>
 

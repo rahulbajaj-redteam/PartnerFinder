@@ -1914,7 +1914,7 @@ def getPartners(queryclause):
     query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.pttv1 "
     
     if len(queryclause)>5:        
-        query = query + 'WHERE ' + str(queryclause) + ' Order by Coordinates desc LIMIT 250;'     
+        query = query + 'WHERE ' + str(queryclause) + ' Order by id desc LIMIT 250;'     
     else:
         query = query + ' Order by Coordinates desc LIMIT 250 ;'
     data = pd.read_sql(query,cnx)

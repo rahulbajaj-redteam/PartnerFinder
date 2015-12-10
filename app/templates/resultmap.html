@@ -29,7 +29,7 @@
     google.setOnLoadCallback(drawBubbleChart);
     google.setOnLoadCallback(drawDonut);
     google.setOnLoadCallback(drawRegionBarChart);
-    google.setOnLoadCallback(drawRegionProdColumnChartnew);
+    google.setOnLoadCallback(drawColumnProdBarChart);
 
 
         
@@ -107,7 +107,18 @@
         };
 
 
+    function drawColumnProdBarChart() {
+             var svg = dimple.newSvg("#fr", "100%", "100%");
 
+     JSONdata = {{ColumnBarListJson|safe}};
+      var myChart = new dimple.chart(svg, JSONdata);
+      myChart.setMargins(80, 40, 30, 40);
+      myChart.addCategoryAxis("x", ["Geo", "ProductBU"]);
+      myChart.addMeasureAxis("y", "PCount");
+      myChart.addSeries("ProductBU", dimple.plot.bar);
+      myChart.addLegend(200, 10, 510, 20, "right");
+      myChart.draw();
+    };
 
 
     function drawRingChart()
@@ -156,23 +167,6 @@
 
 
 
-        function drawRegionProdColumnChartnew() { 
-                var data = google.visualization.arrayToDataTable({{ColumnBarList|safe}});
-        
-                var options = {
-                  chart: {
-                    title: 'Product-Partner distribution by Geo',
-                    subtitle: '-'
-                  }
-                };
-        
-                var chart = new google.charts.Bar(document.getElementById("four_ch"));
-        
-                chart.draw(data, options);
-            };
-
-
-
         
 
   </script>
@@ -187,7 +181,7 @@ function clearGraphs() {
     document.getElementById("one").style.display = "block";
     document.getElementById("two").style.display = "none";
     document.getElementById("three").style.display = "none";
-   
+    document.getElementById("fr").style.display = "none";
     document.getElementById("five").style.display = "none";
 }
 </script>
@@ -429,7 +423,7 @@ function clearGraphs() {
                                                 var vone = document.getElementById('one');
                                                 var vtwo = document.getElementById('two');
                                                 var vthree = document.getElementById('three');
-                                              
+                                               var vfr = document.getElementById('fr');
                                                 var vfive = document.getElementById('five');
                                                 
                                                 if ( vone.style.display == 'block' ) {
@@ -455,12 +449,14 @@ function clearGraphs() {
                                                    
                                                 }      
 
-
+                                               else if ( vfr.style.display == 'block' ) {
+                                                    document.getElementById('fr').style.display = 'none';
+                                                    document.getElementById('three').style.display = 'block';
+                                                } 
 
                                                 else if ( vfive.style.display == 'block' ) {
                                                     document.getElementById('five').style.display = 'none';
-               
-                                                    document.getElementById('three').style.display = 'block';
+                                                    document.getElementById('fr').style.display = 'block';
                                                 }    
                                                 
                                                 else
@@ -479,7 +475,7 @@ function clearGraphs() {
                                                  var vone = document.getElementById('one');
                                                 var vtwo = document.getElementById('two');
                                                 var vthree = document.getElementById('three');
-                                              
+                                              var vfr = document.getElementById('fr');
                                                 var vfive = document.getElementById('five');
                                                 
                                                 if ( vone.style.display == 'block' ) {
@@ -502,9 +498,14 @@ function clearGraphs() {
                                                 else if ( vthree.style.display == 'block' ) {
 
                                                     document.getElementById('three').style.display = 'none';
-                                                    document.getElementById('five').style.display = 'block';
+                                                    document.getElementById('fr').style.display = 'block';
                                                 }  
 
+                                                 else if ( vfr.style.display == 'block' ) {
+                                                    document.getElementById('fr').style.display = 'none';
+                                                    document.getElementById('five').style.display = 'block';
+
+                                                }
 
                                                 else if ( vfive.style.display == 'block' ) {
                                                     document.getElementById('five').style.display = 'none';
@@ -526,8 +527,9 @@ function clearGraphs() {
                     <div id="one" ></div>
                     <div  id="two"></div>
                     <div id="three"></div>
-                   
                     <div id="five"></div>
+                   
+                    <div id="fr"  style="height:100%"></div>
             </td>
 
     </tr>

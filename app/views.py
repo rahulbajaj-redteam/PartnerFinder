@@ -72,11 +72,6 @@ def gdrive():
 @app.route('/', methods= ['GET', 'POST'])
 @app.route('/reset', methods= ['GET', 'POST'])
 def home():
-#    global initvar
-#    if initvar ==0:
-#        setDataSet()
-#        initvar = 1
-        
     query = ''
     form = SearchForm(csrf_enabled=False)
     productFilter = ''
@@ -198,10 +193,7 @@ def home():
 @app.route('/search', methods=['GET', 'POST'])
 @app.route('/graphview', methods=['GET', 'POST'])
 def search():
-#    global initvar
-#    if initvar ==0:
-#        setDataSet()
-#        initvar = 1
+
     query = ''
     form = SearchForm(csrf_enabled=False)
     productFilter = ''
@@ -500,15 +492,15 @@ def ToggleRH0(id):
 def PDetails(id):
     df = getPartnerDetail(id)
     TabOutput = getAssociationDetails(id)
-    Comp   = getCompAssociationDetails(id)
+    #Comp   = getCompAssociationDetails(id)
     Attr = getPAttributes(id)
     Industry = ''
     Business_Process_Outsourcing_Partner_Flag =''
-    Global_Partner_Flag=''
+    #Global_Partner_Flag=''
     Service_Partner_Flag=''
     
     Service_Partner_Flag = str(Attr['Services_Partner'].iloc[0])
-    Global_Partner_Flag = str(Attr['Global_Partner'].iloc[0])
+    #Global_Partner_Flag = str(Attr['Global_Partner'].iloc[0])
     Business_Process_Outsourcing_Partner_Flag = str(Attr['Business_Process_Outsourcing_Partner'].iloc[0])
     Industry = ''
     if int(Attr['Ind_Banking'].iloc[0]) > 0:
@@ -563,7 +555,7 @@ def PDetails(id):
         ToggleBtn = str('<a href = /ToggleRH0/') + str(id) + str('  target = "_blank" >Not a Red Hat Partner</a>')
     else:
         ToggleBtn = str('<a href = /ToggleRH1/') + str(id) + str('  target = "_blank" >Its a Red Hat Partner</a>')
-    return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]), Comp = str(Comp),Industry = Industry , Business_Process_Outsourcing_Partner_Flag=Business_Process_Outsourcing_Partner_Flag,Global_Partner_Flag=str(Attr['Global_Partner'].iloc[0]), Service_Partner_Flag=Service_Partner_Flag,TabOutput=str(TabOutput), ToggleBtn = str(ToggleBtn),id=str(id) )
+    return render_template('PDetails.html', title='Red Hat : Partner Finder', name=str(df['Name'].iloc[0]),url = str('<a href = ') +str(df['Partner_Url'].iloc[0])  + str('  target = "_blank" >') +  str(df['Partner_Url'].iloc[0]) + str('</a>'),email1=str(df['Email1'].iloc[0]),email2=str(df['Email2'].iloc[0]), AD1=str(df['Addr_Line1'].iloc[0]), AD2=str(df['Addr_Line2'].iloc[0]), AD3=str(df['Addr_Line3'].iloc[0]), AD_City=str(df['Addr_City'].iloc[0]), AD_State=str(df['Addr_State'].iloc[0]), AD_Country=str(df['GeoCountry'].iloc[0]), AD_Region=str(df['GeoRegion'].iloc[0]) , AD_Phone1=str(df['Phone1'].iloc[0]),  AD_Fax=str(df['Fax'].iloc[0]), Overview =Overview ,  YearEstablished = str(df['YearEstablished'].iloc[0]), RHP=str(df['RH_Partner'].iloc[0]),Industry = Industry , Business_Process_Outsourcing_Partner_Flag=Business_Process_Outsourcing_Partner_Flag,Global_Partner_Flag=str(Attr['Global_Partner'].iloc[0]), Service_Partner_Flag=Service_Partner_Flag,TabOutput=str(TabOutput), ToggleBtn = str(ToggleBtn),id=str(id) )
     
 
 
@@ -595,7 +587,9 @@ def getAssociationDetails(id):
         htmlText = htmlText +   str(CDet[4]) + '</td><td>' # Product & Services
         htmlText = htmlText + str(CDet[0])[3:len(str(CDet[0]))-2] + '</td><td>' # Specialization
         htmlText = htmlText +   '-' + '</td><td>' # Certification
-        htmlText = htmlText +    str(CDet[1])  + str('</td> <td>') # Authorization
+        
+        
+        htmlText = htmlText +  str('<ul><li>') + str(CDet[1]) + str('</li></ul>') + str('</td> <td>') # Authorization
         htmlText = htmlText + "<b>Category : </b><br/>" + str(CDet[3]) + '<br/><br/> <b>Partners Since :</b><br/>'+  str(CDet[2])   + str('</td></tr>') # Partnership Level
         
     if data['Citrix_Partner_ID'].iloc[0] != '' :
@@ -638,12 +632,17 @@ def getAssociationDetails(id):
         PType = getIBMPTypeAreaDet(id)
         SolnArea = getIBMSolnAreaDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>IBM</b></font></td> <td>')
-        htmlText = htmlText + SolnArea + '</td><td>' # Product & Services
+        if len(SolnArea)>32:    
+            htmlText = htmlText + SolnArea + '</td><td>' # Product & Services
+        else:
+            htmlText = htmlText + '</td><td>'
         htmlText = htmlText + '-' + '</td><td>' # Specialization
         htmlText = htmlText + certList +  str('</td><td>') # Certification
         htmlText = htmlText +   prodList  + str('</td> <td>') # Authorization
-        htmlText = htmlText +  PType   + str('</td></tr>') # Partnership Level
-
+        if len(PType)>30:    
+            htmlText = htmlText +  PType   + str('</td></tr>') # Partnership Level
+        else:
+            htmlText = htmlText    + str('</td></tr>') # Partnership Level
     if data['MS_Partner_ID'].iloc[0] != '' :
         CDet = getMSAssDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Microsoft</b></font></td> <td>')
@@ -678,11 +677,18 @@ def getAssociationDetails(id):
                 Specs = '-'
         # SAP_Engagement,SAP_Type,SAP_Level,SAP_SolnAuth,SAP_FocusArea_RecognisedExpertise,SAP_IndFocus
         htmlText = htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>SAP</b></font></td> <td>')
-        htmlText = htmlText+ "<b>SAP Solutions : </b><br/>"  + cleanList(str(CDet[3]))   +'</td><td>' # Product & Services
+        if len(str(CDet[3]))   > 5:     
+            htmlText = htmlText+ "<b>SAP Solutions : </b><br/>"  + cleanList(str(CDet[3]))   +'</td><td>' # Product & Services
+        else:
+            htmlText = htmlText+ str('-')    +'</td><td>' # Product & Services
         htmlText = htmlText + str(Specs) + '</td><td>' # Specialization
         htmlText = htmlText + '-' +  str('</td><td>') # Certification
         htmlText = htmlText +   cleanList(str(CDet[0])) + "<br><br>" +  str('</td> <td>') # Authorization
-        htmlText = htmlText + "<b>Role : </b><br/>" + cleanList(str(CDet[1]))  + "<br><b>Category : </b>" + str(CDet[2])  + str('</td></tr>') # Partnership Level
+        if len(str(CDet[1]))>3:
+            htmlText = htmlText + "<b>Role : </b><br/>" + cleanList(str(CDet[1]))  
+        if len(str(CDet[2]))>3:
+            htmlText = htmlText + "<br><b>Category : </b>" + str(CDet[2])  
+        htmlText = htmlText + str('</td></tr>') # Partnership Level
 
 
 
@@ -691,7 +697,10 @@ def getAssociationDetails(id):
         CDet = getVMWareAssDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>VMWare</b></font></td> <td>')
         htmlText = htmlText + '-' + '</td><td>' # Product & Services
-        htmlText = htmlText + "<b>Solution Competency : </b>" + str(CDet[1])  + '</td><td>' # Specialization
+        if len(str(CDet[1]))>5:    
+            htmlText = htmlText + "<b>Solution Competency : </b>" + str(CDet[1])  + '</td><td>' # Specialization
+        else:    
+            htmlText = htmlText + "-" + str('')  + '</td><td>' # Specialization
         htmlText = htmlText + str("<b>VMware Certified Professionals : </b>") + str(CDet[4]) + str("<br><br><b>VMware Technical Solutions Professionals : </b>") + str(CDet[5]) + str("<br><br><b>VMware Sales Professionals : </b>") + str(CDet[6])+ str("<br><br><b>VSPCPs : </b>") + str(CDet[7]) +  str("<br><br><b>VMware Operations Professionals : </b>") + str(CDet[8]) + str("<br><br><b>Total Reseller VLEs : </b>") + str(CDet[9]) +  str("<br><br><b>Total Disti VLEs : </b>") + str(CDet[10]) + str('</td><td>') # Certification
         htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
         htmlText = htmlText + "<b>Category : </b><br/>"  + str(CDet[2])   + str('</td></tr>') # Partnership Level
@@ -732,188 +741,6 @@ def getPartnerDetail(id):
     return data
 
 
-
-def getCompAssociationDetails(id):
-    cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-    query = "SELECT VMWare_Partner_ID,MS_Partner_ID,SAP_Partner_ID,Oracle_Partner_ID,Dell_Partner_ID,Citrix_Partner_ID,RH_Partner_ID,IBM_Partner_ID,Cisco_Partner_ID  from rhpartners.pttv1 where id =" + id +" ;"
-    data = pd.read_sql(query,cnx)    
-    cnx.close()
-    if data is None:
-        return "Username or Password is wrong"
-    
-    htmlText = ''
-    
-
-
-    if data['Citrix_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>Citrix</h3>  <div>  ")    
-        CDet = getCitrixAssDet(id)
-
-        Citrix_PLevel = ''
-        if CDet:
-            if len(str(CDet[0]))>3 and str(CDet[0]) != 'None':
-                Citrix_PLevel = "<b>Partnership Level : </b>" + str(CDet[0])  
-                
-        Citrix_PType = ''
-        if CDet:
-            if len(str(CDet[1]))>3 and str(CDet[1]) != 'None':
-                Citrix_PType = "<b>Partner Type : </b>" + str(CDet[1])  
-
-        Citrix_CertCount = ''
-        if CDet:
-            if CDet[2]:
-                if CDet[2]>0 and str(CDet[2])!='NA':
-                    Citrix_CertCount = "<b>Certification Count : </b>" + str(CDet[2])  
-                    
-        Citrix_Products_Certified_to_Sell = ''
-        if CDet:
-            if CDet[3]:
-                if len(str(CDet[3]))>4 and str(CDet[3])!='NA':
-                    Citrix_Products_Certified_to_Sell = "<br><b>Products Certified to Sell : </b><br><ul>" + str(CDet[3]).replace("Citrix","</li><li>Citrix")  
-
-        Citrix_Services_Offered = ''
-        if CDet:
-            if CDet[5]:
-                if len(str(CDet[5]))>4 and str(CDet[5])!='NA':
-                    Citrix_Services_Offered = "<b>Services Offered : </b><br><ul><li>" + str(CDet[5]).replace("|","</li><li>")  
-                    Citrix_Services_Offered = str(Citrix_Services_Offered)[:len(str(Citrix_Services_Offered))-9]
-
-        Citrix_Certifications_Held_by_Staff = ''
-        if CDet:
-            if CDet[6]:
-                if len(str(CDet[6]))>4 and str(CDet[6])!='NA':
-                    Citrix_Certifications_Held_by_Staff = "<b>Citrix_Certifications_Held_by_Staff : </b><br>" +str(CDet[6])[:31]+ "<ul><li>" + str(CDet[6])[31:].replace(")",")</li><li>")  
-                    Citrix_Certifications_Held_by_Staff = str(Citrix_Certifications_Held_by_Staff)[:len(str(Citrix_Certifications_Held_by_Staff))-9]
-        
-        htmlText =  htmlText + str("") + Citrix_PLevel + Citrix_PType + Citrix_CertCount + Citrix_Products_Certified_to_Sell +str("</ul>")+ Citrix_Services_Offered + str("</ul>") + Citrix_Certifications_Held_by_Staff +  str("</ul></div>")
-        
-        
-    
-    if data['Cisco_Partner_ID'].iloc[0] != '' :
-        CDet = getCiscoAssDet(id)
-        htmlText =  htmlText + str("<h3>Cisco</h3>  <div>    <p> <b> Partners Since : </b>") + str(CDet[2])        
-        if len(str(CDet[4]))>5:    
-            htmlText =  htmlText + str("<br><br><b>")+ str(CDet[4])[27:] + str("</b></br></br>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
-        else:
-            htmlText =  htmlText + str("   <p>  <b>Specialization : </b> ") + str(CDet[0])[3:len(str(CDet[0]))-2] + str("</p>  </div>")
-    
-        
-    if data['Dell_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>Dell</h3>  <div> ")
-        CDet = getDellAssDet(id)  
-        Competencies =  ''
-        Relationship = ''
-        P_Customer = ''
-        if CDet[2]:            
-            if len(str(CDet[2]))>4:
-                Relationship = str("</br></br><br><b>Relationship : </b>") + str(CDet[2])
-                
-        if CDet[1]:            
-            if len(str(CDet[1]))>4:
-                Competencies = str("</br></br><b>Competencies : </b>") + str(CDet[1])
-
-
-        htmlText =  htmlText +P_Customer+ Relationship + Competencies + str("  </div>")                                
-    if data['IBM_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>IBM</h3>  <div>    <p>IBM Partner </p>  </div>")   
-
-
-
-
-
-    if data['MS_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>MS</h3><div>")
-        CDet = getMSAssDet(id)
-        Avg_Rating =  " Rating : "+ CDet[0]
-
-        Applications =''
-        if CDet[1]:            
-            if len(str(CDet[1]))>4:
-                Applications = str("<br><b>Applications : </b><ul><li>") + str(CDet[1]).replace("|","</li><li>")
-                
-        Competencies =''
-        if CDet[2]:            
-            if len(str(CDet[2]))>4:
-                Competencies = str("<b>Competencies : </b><ul><li>") + str(CDet[2]).replace("|","</li><li>")
-
-
-        Services =''
-        if CDet[3]:            
-            if len(str(CDet[3]))>4:
-                Services = str("<br><b>Services : </b><ul><li>") + str(CDet[3]).replace("|","</li><li>")
-        htmlText =  htmlText + Avg_Rating + Applications + str("</ul>") + Competencies + str("</ul>") + str("  </div>")
-        
-        
-        
-    if data['Oracle_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>Oracle</h3>  <div> ")
-        CDet = getOracleAssDet(id)
-        Oracle_PLevel = ''
-        Oracle_Adv_Spec_App = ''
-        Oracle_Active_Spec_App = ''
-        if CDet:
-            if len(str(CDet[0]))>3 and str(CDet[0]) != 'None':
-                Oracle_PLevel = "<b>Partnership Level : </b>" + str(CDet[0])  
-            if len(str(CDet[2]))>3 and str(CDet[2]) != 'None':
-                Oracle_Adv_Spec_App = "<br><b>Advance Specialization Applications : </b>" + str(CDet[2])  
-            if len(str(CDet[7]))>3 and str(CDet[7]) != 'None':
-                Oracle_Active_Spec_App = "<br><b>Active Specialization Applications : </b>" + str(CDet[7])  
-                
-        htmlText =  htmlText + Oracle_PLevel + Oracle_Adv_Spec_App + Oracle_Active_Spec_App + str("  </div>")
-        
-
-
-    if data['SAP_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>SAP</h3>  <div>    <p>SAP Partner </p>  </div>")
-
-
-
-
-    if data['VMWare_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>VMWare</h3>  <div>   ")
-        CDet = getVMWareAssDet(id)
-        VM_PLevel = ''
-        VM_Soln_Competency = ''
-        VM_PartnerProgram = ''
-        VM_VCPs = 0
-        VM_VTSPs= 0
-        VM_VSPs=0
-        VM_VSPCPs = 0 
-        VM_VOPs = 0
-        VM_ResellerVLEs = 0
-        VM_DistiVLEs =0
-
-        #VMPPDet 
-# VMWARE Purchasing Program to be added / Partner Program aggregate s
-        
-        if CDet:
-            if len(str(CDet[1]))>3 and str(CDet[1]) != 'None':
-                VM_Soln_Competency = "<br><br><b>Solution Competency : </b>" + str(CDet[1])  
-            if len(str(CDet[2]))>3 and str(CDet[2]) != 'None':
-                VM_PLevel = "<br><br><b>Partnership Level : </b>" + str(CDet[2])  
-            if len(str(CDet[3]))>3 and str(CDet[3]) != 'None':
-                VM_PartnerProgram = "<br><br><b>Partner Program : </b>" + str(CDet[3])  
-            if  CDet[4] > 0 :
-                VM_VCPs = str("<br><br><b>VMware Certified Professionals : </b>") + str(CDet[4])
-            if  CDet[5] > 0 :
-                VM_VTSPs = str("<br><br><b>VMware Technical Solutions Professionals : </b>") + str(CDet[5])
-            if  CDet[6] > 0 :
-                VM_VSPs = str("<br><br><b>VMware Sales Professionals : </b>") + str(CDet[6])
-            if  CDet[7] > 0 :
-                VM_VSPCPs = str("<br><br><b>VSPCPs : </b>") + str(CDet[7])
-            if  CDet[8] > 0 :
-                VM_VOPs = str("<br><br><b>VMware Operations Professionals : </b>") + str(CDet[8])
-            if  CDet[9] > 0 :
-                VM_ResellerVLEs = str("<br><br><b>Total Reseller VLEs : </b>") + str(CDet[9])
-            if  CDet[10] > 0 :
-                VM_DistiVLEs = str("<br><br><b>Total Disti VLEs : </b>") + str(CDet[10])
-    
-        htmlText =  htmlText + VM_PLevel + VM_Soln_Competency + VM_PartnerProgram +VM_VCPs + VM_VTSPs + VM_VSPs + VM_VSPCPs + VM_VOPs +  VM_ResellerVLEs + VM_DistiVLEs +str("  </div>")
-    
-    
-    if data['RH_Partner_ID'].iloc[0] != '' :
-        htmlText =  htmlText + str("<h3>RH</h3>  <div>    <p>RH Partner </p>  </div>")
-    return htmlText
 
 
 
@@ -1221,10 +1048,7 @@ def getCitrixAssDet(id):
 
 @app.route('/mapview' , methods=['GET', 'POST'])
 def mapview():
-#    global initvar
-#    if initvar ==0:
-#        setDataSet()
-#        initvar = 1
+
     form = SearchForm(csrf_enabled=False)
     query = ''
     productFilter = ''
@@ -1348,13 +1172,17 @@ def mapview():
     ColumnBarList = []
     ColumnBarList.append(['Geo','Platforms', 'Virtualization' ,'Cloud' ,'Storage', 'Middleware', 'Analytics' ,'IoT' ,'DataManagement' ,'Mobility' , 'SCM' ,'CRM'])
     
+    
+    
+     
+    
     for j in range(0,len(x.ix[:,:])):
         ColumnBarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2]) , int(x.ix[j,3])  ,  int(x.ix[j,4]) , int(x.ix[j,5])  ,  int(x.ix[j,6]) , int(x.ix[j,7])  ,  int(x.ix[j,8]) , int(x.ix[j,9])  ,  int(x.ix[j,10]) , int(x.ix[j,11])  ])    
         
+    ColumnBarListJson = getRegionProdRHBarDataJson(query,region_req)   
     
     
-    
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList,ColumnBarList=ColumnBarList)
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList,ColumnBarList=ColumnBarList,ColumnBarListJson = ColumnBarListJson)
 
 
 
@@ -1388,7 +1216,7 @@ def getBubbleList():
 
 
 def getDonutList(queryclause):
-    query = "SELECT sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics)as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_CRM) as CRM,sum(Prod_SCM) as SCM,sum(Prod_Security) as Security FROM `rhpartners`.`ptt`;"
+    query = "SELECT sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics)as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_CRM) as CRM,sum(Prod_SCM) as SCM,sum(Prod_Security) as Security FROM `rhpartners`.`pttv1`  WHERE RH_Partner = 0 and " + queryclause + ";"
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     data = pd.read_sql(query,cnx) 
     cnx.close()
@@ -1509,6 +1337,76 @@ def getProdRHPartnerBarData(queryclause):
     cnx.close()
     return result.values.tolist() 
 
+
+
+
+def getRegionProdRHBarDataJson(queryclause,region_req):
+    result = []
+    try:
+        
+        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
+        if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
+            str1 = "SELECT GeoRegion as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from rhpartners.pttv1 where " + queryclause + " and  GeoRegion not like 'Unknown' and GeoCountry not like 'Unknown' Group By GeoRegion;"
+            result = pd.read_sql(str1, cnx)
+
+            
+        elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
+            query = "Select GeoCountry as Geo, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
+            ResultDS_Country = pd.read_sql(query,cnx)
+            ResultDS_Country.columns = ['GeoCountry','Partner']
+            Clist = ResultDS_Country.GeoCountry.values.tolist()
+            list = ''
+            for j in Clist:
+                list = list + "','" + str(j)        
+            list = list[2:] + "'"
+            query = "SELECT GeoCountry as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry;"
+            result = pd.read_sql(query,cnx)
+
+        elif str(queryclause).find('GeoCountry') > 0:
+            query = "Select GeoCountry as Geo, count(*) from pttv1 WHERE " + queryclause  +"  And GeoCountry not like 'Unknown'  group by GeoCountry order by 2 desc LIMIT 5 ;"
+            ResultDS_Country = pd.read_sql(query,cnx)
+            ResultDS_Country.columns = ['GeoCountry','Partner']
+            Clist = ResultDS_Country.GeoCountry.values.tolist()
+            list = ''
+            for j in Clist:
+                list = list + "','" + str(j)        
+            list = list[2:] + "'"
+            query = "SELECT GeoCountry as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where RH_Partner = 0 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry;"
+            result = pd.read_sql(query,cnx)
+          
+    except:
+        result = []
+    cnx.close()
+    
+    
+    r = result.transpose()
+
+    res = pd.DataFrame()
+    res = pd.concat([res,r[0][1:]],axis=1)
+    res[1] = "APAC"
+    result  = res
+    result.columns = ['PCount', 'Geo']
+    
+    res = pd.DataFrame(r[1][1:])
+    res[2] = "EMEA"
+    res.columns = ['PCount', 'Geo']
+    result = result.append(res)
+    
+    
+    res = pd.DataFrame(r[2][1:])
+    res[1] = "LATAM"
+    res.columns = ['PCount', 'Geo']
+    result = result.append(res)
+    
+    res = pd.DataFrame(r[3][1:])
+    res[2] = "NA"
+    res.columns = ['PCount', 'Geo']
+    result = result.append(res)
+    
+    result.index.name = 'ProductBU'
+    result.reset_index(inplace=True)
+    result = result.to_json(orient='records')
+    return result
 
 
 
@@ -1871,9 +1769,9 @@ def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,De
              
     if Global_Partner_req:
          if len(query)<5:
-             query = query + ' Global_Partner == 1 ' 
+             query = query + ' Global_Partner = 1 ' 
          else:
-             query = str(query) + ' and  Global_Partner == 1 ' 
+             query = str(query) + ' and  Global_Partner = 1 ' 
     else:
          if len(query)<5:
              query = query + " Global_Partner != 2 " 

@@ -108,9 +108,9 @@
 
 
     function drawColumnProdBarChart() {
-             var svg = dimple.newSvg("#fr", "100%", "100%");
 
-     JSONdata = {{ColumnBarListJson|safe}};
+      var svg = dimple.newSvg("#fr", "100%", "100%");
+      JSONdata = {{ColumnBarListJson|safe}};
       var myChart = new dimple.chart(svg, JSONdata);
       myChart.setMargins(80, 40, 30, 40);
       myChart.addCategoryAxis("x", ["Geo", "ProductBU"]);
@@ -118,6 +118,7 @@
       myChart.addSeries("ProductBU", dimple.plot.bar);
       myChart.addLegend(200, 10, 510, 20, "right");
       myChart.draw();
+    
     };
 
 
@@ -175,6 +176,7 @@
 
 
 <body class="no-trans"  onload="clearGraphs()" >
+{{query|safe}}
 <script>
 
 function clearGraphs() {

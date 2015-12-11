@@ -23,24 +23,6 @@ import pandasql as pdsql
 
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
-#PTT_Dataset = pd.DataFrame()
-#initvar = 0
-#cnx1 = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-#squery = "SELECT * from rhpartners.pttv1 ;"
-#PTT_Dataset = pd.read_sql(squery,cnx1)    
-#cnx1.close()
-    
-    
-#def setDataSet():
-#    global PTT_Dataset
-#    if PTT_Dataset.shape[0]>90000:
-#        pass
-#    else:
-#        cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-#        squery = "SELECT * from rhpartners.pttv1 ;"
-#        PTT_Dataset = pd.read_sql(squery,cnx)    
-#        cnx.close()
-    
 
 
 @app.route('/gdrive',methods=['GET'])
@@ -590,20 +572,37 @@ def getAssociationDetails(id):
         
         
         htmlText = htmlText +  str('<ul><li>') + str(CDet[1]) + str('</li></ul>') + str('</td> <td>') # Authorization
-        htmlText = htmlText + "<b>Category : </b><br/>" + str(CDet[3]) + '<br/><br/> <b>Partners Since :</b><br/>'+  str(CDet[2])   + str('</td></tr>') # Partnership Level
-        
+        if len(str(CDet[3]))>1:    
+            htmlText = htmlText + "<b>Category : </b><br/>" + str(CDet[3]) + '<br/><br/>'  # Partnership Level
+        if len(str(CDet[2]))>1:
+            htmlText = htmlText + '<b>Partners Since :</b><br/>'+  str(CDet[2])
+            
+        htmlText = htmlText + str('</td></tr>') 
+            
     if data['Citrix_Partner_ID'].iloc[0] != '' :
         CDet = getCitrixAssDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Citrix</b></font></td> <td>')
         htmlText = htmlText + "<b>Products Certified to Sell : </b><br><ul>" + str(CDet[3]).replace("Citrix","</li><li>Citrix") + '</td><td>' # Product & Services
-        htmlText = htmlText + "<b>Industry Served : </b><br>" + str(CDet[4])+'</td><td>' # Specialization
-        Citrix_Certifications_Held_by_Staff = "<br/><b>Citrix_Certifications_Held_by_Staff : </b><br>" +str(CDet[6])[:31]+ "<ul><li>" + str(CDet[6])[31:].replace(")",")</li><li>")  
+        if len(str(CDet[4]))>5:    
+            htmlText = htmlText + "<b>Industry Served : </b><br>" + str(CDet[4])+'</td><td>' # Specialization
+        else:
+            htmlText = htmlText + "-" + '</td><td>' # Specialization
+        Citrix_Certifications_Held_by_Staff = ''
+        if len(str(CDet[6])[31:])>1:            
+            Citrix_Certifications_Held_by_Staff = "<br/><b>Citrix_Certifications_Held_by_Staff : </b><br>" +str(CDet[6])[:31]+ "<ul><li>" + str(CDet[6])[31:].replace(")",")</li><li>")  
+            
         htmlText = htmlText +  "<b>Certification Count : </b>" + str(CDet[2])  + "<br/>" +str(Citrix_Certifications_Held_by_Staff)[:len(str(Citrix_Certifications_Held_by_Staff))-9] +  str('</td><td>') # Certification
-        htmlText = htmlText +  "<b>Services Offered : </b><br/><ul><li>" + str(CDet[5]).replace("|","</li><li>")[:-4]  + str('</ul></td> <td>') # Authorization
+        if len(str(CDet[5]))>1:    
+            htmlText = htmlText +  "<b>Services Offered : </b><br/><ul><li>" + str(CDet[5]).replace("|","</li><li>")[:-4]  + str('</ul></td> <td>') # Authorization
+        else:
+            htmlText = htmlText +  "-"  + str('</td> <td>') # Authorization
+        
         if int(CDet[7])>0:
             htmlText = htmlText + "<b>Role : </b><br/>" + str(CDet[1]) + "<br/><br/><b>Category : </b><br/>" + str(CDet[0]) + "<br/><br/><b>Partner Since : </b>" + str(2015 - int(CDet[7]) ) + str('</td></tr>') # Partnership Level
         else:
             htmlText = htmlText + "<b>Role : </b><br/>" + str(CDet[1]) + "<br/><br/><b>Category : </b>" + str(CDet[0]) +  str('</td></tr>') # Partnership Level
+
+
 
     if data['Dell_Partner_ID'].iloc[0] != '' :
         CDet = getDellAssDet(id)
@@ -643,6 +642,8 @@ def getAssociationDetails(id):
             htmlText = htmlText +  PType   + str('</td></tr>') # Partnership Level
         else:
             htmlText = htmlText    + str('</td></tr>') # Partnership Level
+            
+            
     if data['MS_Partner_ID'].iloc[0] != '' :
         CDet = getMSAssDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Microsoft</b></font></td> <td>')
@@ -659,7 +660,11 @@ def getAssociationDetails(id):
         CDet = getOracleAssDet(id)
         htmlText =  htmlText + str('<tr><td bgcolor="#000000"><font color="#fff"><b>Oracle</b></font></td> <td>')
         htmlText = htmlText + '-' + '</td><td>' # Product & Services
-        htmlText = htmlText + "<b>Advance Specialization Applications : </b>" + str(CDet[2]) + '<br/>' + "<br><b>Active Specialization Applications : </b>" + str(CDet[7]) +'</td><td>' # Specialization
+        if len(str(CDet[2]))>1:
+            htmlText = htmlText + "<b>Advance Specialization Applications : </b>" + str(CDet[2]) + '<br/><br>' 
+        if len(str(CDet[7]))  >1:  
+            htmlText = htmlText + "<b>Active Specialization Applications : </b>" + str(CDet[7]) # Specialization
+        htmlText = htmlText +'</td><td>'
         htmlText = htmlText + '-' +  str('</td><td>') # Certification
         htmlText = htmlText +   '-'  + str('</td> <td>') # Authorization
         htmlText = htmlText + "<b>Category : </b><br/>" + str(CDet[0])    + str('</td></tr>') # Partnership Level
@@ -1130,7 +1135,7 @@ def mapview():
             query = str(query) + ' and ' +  str(levelFilter) 
 
     query = setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req,RH_Partner_req)
-        
+    NonRHQuery =     setNonRHPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req)
     if len(query) > 2:    
         x= getPartnersLoc(query)
     else: 
@@ -1140,7 +1145,8 @@ def mapview():
     variable = []
     variable.append([ 'Country' , 'Partners'  ])
     for j in range(0,len(x.ix[:,:])):
-        variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])      
+        variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])) ,  x.ix[j,1] ])   
+        
     BarJson = getBubbleJson(country_req)
     ORingJson = getORingJson(country_req)
     IRingJson = getIRingJson(country_req)
@@ -1155,33 +1161,34 @@ def mapview():
 
     DonutList = getDonutList(query)
 
-    x = getRegionRHPartnerBarData(query,region_req)
+    x = getRegionRHPartnerBarData(getRegionRHPartnerBarData,region_req)
     x = pd.DataFrame(x)
     x=x[0::]
     BarList = []
+    ColumnBarList = []  
+    ColumnBarListJson = ''
+      
     BarList.append(['Region','RHPartner','NonRHPartner'])
-    
-    for j in range(0,len(x.ix[:,:])):
-        if x.shape[1]==2:
-           x.ix[j,2] = 0 
-        BarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2])  ])      
-   
 
-    x = getRegionProdRHBarData(query,region_req)
-    x = pd.DataFrame(x)
-    ColumnBarList = []
-    ColumnBarList.append(['Geo','Platforms', 'Virtualization' ,'Cloud' ,'Storage', 'Middleware', 'Analytics' ,'IoT' ,'DataManagement' ,'Mobility' , 'SCM' ,'CRM'])
-    
-    
-    
-     
-    
-    for j in range(0,len(x.ix[:,:])):
-        ColumnBarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2]) , int(x.ix[j,3])  ,  int(x.ix[j,4]) , int(x.ix[j,5])  ,  int(x.ix[j,6]) , int(x.ix[j,7])  ,  int(x.ix[j,8]) , int(x.ix[j,9])  ,  int(x.ix[j,10]) , int(x.ix[j,11])  ])    
+    try:
         
-    ColumnBarListJson = getRegionProdRHBarDataJson(query,region_req)   
+        for j in range(0,len(x.ix[:,:])):
+            if x.shape[1]==2:
+               x.ix[j,2] = 0 
+            BarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2])  ])      
+       
     
-    
+        x = getRegionProdRHBarData(query,region_req)
+        x = pd.DataFrame(x)
+      
+        ColumnBarList.append(['Geo','Platforms', 'Virtualization' ,'Cloud' ,'Storage', 'Middleware', 'Analytics' ,'IoT' ,'DataManagement' ,'Mobility' , 'SCM' ,'CRM'])
+ 
+        for j in range(0,len(x.ix[:,:])):
+            ColumnBarList.append([  str(x.ix[j,0]) ,  int(x.ix[j,1])  ,  int(x.ix[j,2]) , int(x.ix[j,3])  ,  int(x.ix[j,4]) , int(x.ix[j,5])  ,  int(x.ix[j,6]) , int(x.ix[j,7])  ,  int(x.ix[j,8]) , int(x.ix[j,9])  ,  int(x.ix[j,10]) , int(x.ix[j,11])  ])    
+            
+        ColumnBarListJson = getRegionProdRHBarDataJson(query,region_req)   
+    except:
+        pass 
     return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList,ColumnBarList=ColumnBarList,ColumnBarListJson = ColumnBarListJson)
 
 
@@ -1273,46 +1280,89 @@ def getRegionRHPartnerBarData(queryclause,region_req):
     try:
         
         cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-        if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
-            query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
-            ResultDS_NonRH = pd.read_sql(query,cnx)
-            ResultDS_NonRH.columns = ['GeoRegion','NonRH_Partner']
-            query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
-            ResultDS_RH = pd.read_sql(query,cnx)
-            ResultDS_RH.columns = ['GeoRegion','RH_Partner']
-            result=pd.concat([ResultDS_RH.GeoRegion,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
-        elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
-            query = "Select GeoCountry, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
-            ResultDS_Country = pd.read_sql(query,cnx)
-            ResultDS_Country.columns = ['GeoCountry','Partner']
-            Clist = ResultDS_Country.GeoCountry.values.tolist()
-            list = ''
-            for j in Clist:
-                list = list + "','" + str(j)        
-            list = list[2:] + "'"
-            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry,RH_Partner;"
-            ResultDS_NonRH = pd.read_sql(query,cnx)
-            ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
-            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + " and GeoCountry in (" + str(list) + ")  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
-            ResultDS_RH = pd.read_sql(query,cnx)
-            ResultDS_RH.columns = ['GeoCountry','RH_Partner']
-            result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
-        elif str(queryclause).find('GeoCountry') > 0:
-            query = "Select GeoCountry, count(*) from pttv1 WHERE " + queryclause  +"  And GeoCountry not like 'Unknown'  group by GeoCountry order by 2 desc LIMIT 5 ;"
-            ResultDS_Country = pd.read_sql(query,cnx)
-            ResultDS_Country.columns = ['GeoCountry','Partner']
-            Clist = ResultDS_Country.GeoCountry.values.tolist()
-            list = ''
-            for j in Clist:
-                list = list + "','" + str(j)        
-            list = list[2:] + "'"
-            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
-            ResultDS_NonRH = pd.read_sql(query,cnx)
-            ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
-            query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
-            ResultDS_RH = pd.read_sql(query,cnx)
-            ResultDS_RH.columns = ['GeoCountry','RH_Partner']
-            result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+        if str(queryclause).find('RH_Partner')>0:
+                
+            if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
+                query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
+                ResultDS_NonRH = pd.read_sql(query,cnx)
+                ResultDS_NonRH.columns = ['GeoRegion','NonRH_Partner']
+                query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
+                ResultDS_RH = pd.read_sql(query,cnx)
+                ResultDS_RH.columns = ['GeoRegion','RH_Partner']
+                result=pd.concat([ResultDS_RH.GeoRegion,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+            elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
+                query = "Select GeoCountry, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
+                ResultDS_Country = pd.read_sql(query,cnx)
+                ResultDS_Country.columns = ['GeoCountry','Partner']
+                Clist = ResultDS_Country.GeoCountry.values.tolist()
+                list = ''
+                for j in Clist:
+                    list = list + "','" + str(j)        
+                list = list[2:] + "'"
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where  " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry,RH_Partner;"
+                ResultDS_NonRH = pd.read_sql(query,cnx)
+                ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where  " + queryclause + " and GeoCountry in (" + str(list) + ")  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
+                ResultDS_RH = pd.read_sql(query,cnx)
+                ResultDS_RH.columns = ['GeoCountry','RH_Partner']
+                result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+            elif str(queryclause).find('GeoCountry') > 0:
+                query = "Select GeoCountry, count(*) from pttv1 WHERE " + queryclause  +"  And GeoCountry not like 'Unknown'  group by GeoCountry order by 2 desc LIMIT 5 ;"
+                ResultDS_Country = pd.read_sql(query,cnx)
+                ResultDS_Country.columns = ['GeoCountry','Partner']
+                Clist = ResultDS_Country.GeoCountry.values.tolist()
+                list = ''
+                for j in Clist:
+                    list = list + "','" + str(j)        
+                list = list[2:] + "'"
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where  " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
+                ResultDS_NonRH = pd.read_sql(query,cnx)
+                ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where  " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
+                ResultDS_RH = pd.read_sql(query,cnx)
+                ResultDS_RH.columns = ['GeoCountry','RH_Partner']
+                result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+        else:
+            if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
+                query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
+                ResultDS_NonRH = pd.read_sql(query,cnx)
+                ResultDS_NonRH.columns = ['GeoRegion','NonRH_Partner']
+                query = "SELECT GeoRegion,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + " And GeoRegion not like 'Unknown' Group By GeoRegion,RH_Partner;"
+                ResultDS_RH = pd.read_sql(query,cnx)
+                ResultDS_RH.columns = ['GeoRegion','RH_Partner']
+                result=pd.concat([ResultDS_RH.GeoRegion,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+            elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
+                query = "Select GeoCountry, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
+                ResultDS_Country = pd.read_sql(query,cnx)
+                ResultDS_Country.columns = ['GeoCountry','Partner']
+                Clist = ResultDS_Country.GeoCountry.values.tolist()
+                list = ''
+                for j in Clist:
+                    list = list + "','" + str(j)        
+                list = list[2:] + "'"
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry,RH_Partner;"
+                ResultDS_NonRH = pd.read_sql(query,cnx)
+                ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + " and GeoCountry in (" + str(list) + ")  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
+                ResultDS_RH = pd.read_sql(query,cnx)
+                ResultDS_RH.columns = ['GeoCountry','RH_Partner']
+                result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)
+            elif str(queryclause).find('GeoCountry') > 0:
+                query = "Select GeoCountry, count(*) from pttv1 WHERE " + queryclause  +"  And GeoCountry not like 'Unknown'  group by GeoCountry order by 2 desc LIMIT 5 ;"
+                ResultDS_Country = pd.read_sql(query,cnx)
+                ResultDS_Country.columns = ['GeoCountry','Partner']
+                Clist = ResultDS_Country.GeoCountry.values.tolist()
+                list = ''
+                for j in Clist:
+                    list = list + "','" + str(j)        
+                list = list[2:] + "'"
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 0 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
+                ResultDS_NonRH = pd.read_sql(query,cnx)
+                ResultDS_NonRH.columns = ['GeoCountry','NonRH_Partner']
+                query = "SELECT GeoCountry,Count(RH_Partner) from  pttv1 Where RH_Partner = 1 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry,RH_Partner;"
+                ResultDS_RH = pd.read_sql(query,cnx)
+                ResultDS_RH.columns = ['GeoCountry','RH_Partner']
+                result=pd.concat([ResultDS_RH.GeoCountry,ResultDS_RH.RH_Partner,ResultDS_NonRH.NonRH_Partner],axis=1)            
     except:
         result = DataFrame()
     cnx.close()
@@ -1784,30 +1834,85 @@ def setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,De
 
 
 
+
+
+
+
+
+
+def setNonRHPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req):
+   
+    if CISCO_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' Cisco_Partner_Flag = 1 and Cisco_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' Cisco_Partner_Flag = 1 and Cisco_Ctry_Partner_Flag = 1' 
+
+    if CITRIX_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' Citrix_Partner_Flag = 1 and Citrix_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' Citrix_Partner_Flag = 1 and Citrix_Ctry_Partner_Flag = 1' 
+    if MS_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' MS_Partner_Flag = 1 and MS_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' MS_Partner_Flag = 1 and MS_Ctry_Partner_Flag = 1' 
+                
+    if Dell_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' Dell_Partner_Flag = 1 and Dell_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' Dell_Partner_Flag = 1 and Dell_Ctry_Partner_Flag = 1' 
+                
+    if IBM_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' IBM_Partner_Flag = 1 and IBM_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' IBM_Partner_Flag = 1 and IBM_Ctry_Partner_Flag = 1' 
+                
+    if Oracle_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' Oracle_Partner_Flag = 1 and Oracle_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' Oracle_Partner_Flag = 1 and Oracle_Ctry_Partner_Flag = 1' 
+
+
+    if VM_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' VMWare_Partner_Flag = 1 and VMWare_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' VMWare_Partner_Flag = 1 and VMWare_Ctry_Partner_Flag = 1' 
+
+
+                
+
+
+    if SAP_Partner_req == ['1']:
+         if len(query)<5:
+             query = query + ' SAP_Partner_Flag = 1 and SAP_Ctry_Partner_Flag = 1' 
+         else:
+             query = str(query) + ' and ' +  ' SAP_Partner_Flag = 1 and SAP_Ctry_Partner_Flag = 1' 
+             
+    if Global_Partner_req:
+         if len(query)<5:
+             query = query + ' Global_Partner = 1 ' 
+         else:
+             query = str(query) + ' and  Global_Partner = 1 ' 
+    else:
+         if len(query)<5:
+             query = query + " Global_Partner != 2 " 
+         else:
+             query = str(query) + " and  Global_Partner != 2 "
+        
+    return query                  
+
+
                  
                  
                  
 def getPartners(queryclause):
-#    pysql = lambda q: pdsql.sqldf(q, globals())
-#    str1 = "select Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from  PTT_Dataset where " + queryclause + "Order By Coordinates desc LIMIT 250 ;"
-#    ResultDS = pysql(str1)
-#    if len(queryclause)>25:
-#        dfquery = '(' + queryclause + ')'
-#        if str(dfquery).find('and') >0:    
-#            dfquery = str(dfquery).replace('and' , ' ) and ( ')
-#            dfquery = str(dfquery).replace('"' , '')
-#    if len(dfquery)>7: 
-#        if dfquery.startswith('"') and dfquery.endswith('"'):
-#            dfquery = dfquery[1:-1]
-#        ResultDS = PTT_Dataset.query(str(dfquery))    
-#    else:
-#        ResultDS = PTT_Dataset
-#    else:
-#        ResultDS = PTT_Dataset
-#    ResultDS = ResultDS[['Name','GeoCountry','GeoRegion','Partner_Url','id','Coordinates']]
-#    ResultDS = ResultDS.sort(['Coordinates'], ascending=False)
-#    ResultDS = ResultDS.head(250)
-#    return ResultDS
+
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     query = "SELECT Name,GeoCountry,GeoRegion,Partner_Url,id,Coordinates from rhpartners.pttv1 "
     
@@ -1825,24 +1930,7 @@ def getPartners(queryclause):
 
 
 def getPartnersLoc(queryclause):
-#    if len(queryclause)>5:
-#        dfquery = '(' + queryclause + ')'
-#        if str(dfquery).find('and') >0:    
-#            dfquery = str(dfquery).replace('and' , ' ) and ( ')
-#        if len(dfquery)>7: 
-#            ResultDS = PTT_Dataset.query(dfquery)    
-#        else:
-#            ResultDS = PTT_Dataset
-#    else:
-#        ResultDS = PTT_Dataset
-#    pysql = lambda q: pdsql.sqldf(q, globals())
-#    str1 = "select GeoCountry  from  PTT_Dataset where " + queryclause + " ;"
-#    ResultDS = pysql(str1)
-#    df = pd.DataFrame(ResultDS.GeoCountry.value_counts())
-#    df.index.name = 'GeoCountry'
-#    df.reset_index(inplace=True)
-#    df.columns = ['GeoCountry','Count']
-#    return df
+
     cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
     query = "SELECT GeoCountry,Count(*) AS Count from rhpartners.pttv1 "
     

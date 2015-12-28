@@ -5,21 +5,16 @@ Created on Fri Jul 24 16:52:21 2015
 @author: rbajaj
 """
 from __future__ import print_function
-import MySQLdb
 import string
 import mysql.connector
 from app import app
-import numpy as np
 from .SearchForm import SearchForm
 import pandas as pd            
 from pandas import DataFrame
-from flask import Flask , request, render_template, Response,redirect,jsonify,make_response,session
-import re, json
-import collections
+from flask import   request, render_template, redirect,make_response,session
 from datetime import date
 import math
-import csv
-import pandasql as pdsql
+
 
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
@@ -148,7 +143,10 @@ def home():
     variable = []
     geo = [['Lat', 'Long', 'Name']]
     for j in range(0,len(x.ix[:,:])):
-        variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])).upper() + str('<BR>') + str('<a href = /PWeb/') + str(x.ix[j,3]) + str('  target = "_blank" >WebSite</a>') + str('&nbsp;&nbsp;|&nbsp;&nbsp;<a href="PDetails/') + str(x.ix[j,4]) + str('" target = "_blank" > Details</a>') ])
+        url = str(x.ix[j,3])
+        url = str(url).replace("http://","")
+        url = str(url).replace("https://","")
+        variable.append([str(filter(lambda x: x in string.printable, x.ix[j,0])).upper() + str('<BR>') + str('<a href = /PWeb/') + str(url) + str('  target = "_blank" >WebSite</a>') + str('&nbsp;&nbsp;|&nbsp;&nbsp;<a href="PDetails/') + str(x.ix[j,4]) + str('" target = "_blank" > Details</a>') ])
         try:
             lat = float(str(x.ix[j,5])[1:str(x.ix[j,5]).find(',')-1])
             long =float(str(x.ix[j,5])[str(x.ix[j,5]).find(',')+1:len(str(x.ix[j,5]))-1])
@@ -1136,6 +1134,7 @@ def mapview():
 
     query = setPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req,RH_Partner_req)
     NonRHQuery =     setNonRHPartnerFlags(query,CISCO_Partner_req,CITRIX_Partner_req,MS_Partner_req,Dell_Partner_req,IBM_Partner_req,Oracle_Partner_req,VM_Partner_req,SAP_Partner_req,Global_Partner_req)
+    
     if len(query) > 2:    
         x= getPartnersLoc(query)
     else: 
@@ -1161,7 +1160,7 @@ def mapview():
 
     DonutList = getDonutList(query)
 
-    x = getRegionRHPartnerBarData(getRegionRHPartnerBarData,region_req)
+    x = getRegionRHPartnerBarData(NonRHQuery,region_req)
     x = pd.DataFrame(x)
     x=x[0::]
     BarList = []
@@ -1189,7 +1188,7 @@ def mapview():
         ColumnBarListJson = getRegionProdRHBarDataJson(query,region_req)   
     except:
         pass 
-    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList,ColumnBarList=ColumnBarList,ColumnBarListJson = ColumnBarListJson)
+    return render_template('resultmap.html',  title='Sign In',   dfmap=variable,query=str(query),form = form,Cisco_dummy = CISCO_Partner_req,CITRIX_dummy = CITRIX_Partner_req,MS_dummy = MS_Partner_req,Dell_dummy = Dell_Partner_req,IBM_dummy = IBM_Partner_req,Oracle_dummy = Oracle_Partner_req,VM_dummy = VM_Partner_req,SAP_dummy = SAP_Partner_req,RH_dummy = RH_Partner_req,bubble = BarJson, ORingJson = ORingJson, IRingJson = IRingJson,BubbleList = BubbleList,DonutList=DonutList,RegionBarList=BarList,ColumnBarList=ColumnBarList,ColumnBarListJson = ColumnBarListJson,region_req=region_req)
 
 
 
@@ -1395,13 +1394,15 @@ def getRegionProdRHBarDataJson(queryclause,region_req):
     try:
         
         cnx = mysql.connector.connect(user='rbajaj', password = 'nxzd8978',  host='localhost', database='RHPartners')
-        if str(queryclause).find('GeoRegion') + str(queryclause).find('GeoCountry') < 0:    
+
+
+        if str(queryclause).find('GeoRegion') <0 and str(queryclause).find('GeoCountry') < 0:    
             str1 = "SELECT GeoRegion as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from rhpartners.pttv1 where " + queryclause + " and  GeoRegion not like 'Unknown' and GeoCountry not like 'Unknown' Group By GeoRegion;"
             result = pd.read_sql(str1, cnx)
 
             
-        elif str(queryclause).find('GeoRegion') > 0 and str(queryclause).find('GeoCountry') < 0:
-            query = "Select GeoCountry as Geo, count(*) from pttv1 WHERE GeoRegion like '%" + region_req  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
+        elif str(queryclause).find('GeoRegion') >= 0 and str(queryclause).find('GeoCountry') < 0:
+            query = "Select GeoCountry as Geo, count(*) from pttv1 WHERE GeoRegion like '%" + str(region_req)  +"%' And GeoRegion not like 'Unknown' group by GeoCountry order by 2 desc LIMIT 5 ;"
             ResultDS_Country = pd.read_sql(query,cnx)
             ResultDS_Country.columns = ['GeoCountry','Partner']
             Clist = ResultDS_Country.GeoCountry.values.tolist()
@@ -1409,7 +1410,7 @@ def getRegionProdRHBarDataJson(queryclause,region_req):
             for j in Clist:
                 list = list + "','" + str(j)        
             list = list[2:] + "'"
-            query = "SELECT GeoCountry as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where RH_Partner = 0 and " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry;"
+            query = "SELECT GeoCountry as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where " + queryclause + " and GeoCountry in (" + str(list) + ") And GeoCountry not like 'Unknown' Group By GeoCountry;"
             result = pd.read_sql(query,cnx)
 
         elif str(queryclause).find('GeoCountry') > 0:
@@ -1421,7 +1422,7 @@ def getRegionProdRHBarDataJson(queryclause,region_req):
             for j in Clist:
                 list = list + "','" + str(j)        
             list = list[2:] + "'"
-            query = "SELECT GeoCountry as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where RH_Partner = 0 and " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry;"
+            query = "SELECT GeoCountry as Geo,sum(Prod_Platforms) as Platforms,sum(Prod_Virtualization) as Virtualization,sum(Prod_Cloud) as Cloud ,sum(Prod_Storage) as Storage ,sum(Prod_Middleware) as Middleware,sum(Prod_Analytics) as Analytics,sum(Prod_IoT) as IoT,sum(Prod_DataManagement) as DataManagement,sum(Prod_Mobility) as Mobility,sum(Prod_SCM) as SCM, sum(Prod_CRM) as CRM from  pttv1 Where " + queryclause + "  And GeoCountry not like 'Unknown'  Group By GeoCountry;"
             result = pd.read_sql(query,cnx)
           
     except:
@@ -1430,28 +1431,25 @@ def getRegionProdRHBarDataJson(queryclause,region_req):
     
     
     r = result.transpose()
-
+    
+        
+    n = len(r.columns)
+    
+    result = pd.DataFrame()
     res = pd.DataFrame()
-    res = pd.concat([res,r[0][1:]],axis=1)
-    res[1] = "APAC"
-    result  = res
-    result.columns = ['PCount', 'Geo']
-    
-    res = pd.DataFrame(r[1][1:])
-    res[2] = "EMEA"
-    res.columns = ['PCount', 'Geo']
-    result = result.append(res)
-    
-    
-    res = pd.DataFrame(r[2][1:])
-    res[1] = "LATAM"
-    res.columns = ['PCount', 'Geo']
-    result = result.append(res)
-    
-    res = pd.DataFrame(r[3][1:])
-    res[2] = "NA"
-    res.columns = ['PCount', 'Geo']
-    result = result.append(res)
+    for i in range(1,n+1) :
+        if i ==1:
+            res = pd.concat([res,r[i-1][1:]],axis=1)
+            res[i] = r.iloc[0][0]
+           
+            res.columns = ['PCount', 'Geo']
+            result = res      
+        else:
+            res = pd.DataFrame(r[i-1][1:])
+            res[i] = r.iloc[0][i-1]    
+            res.columns = ['PCount', 'Geo']
+            result = result.append(res)
+        
     
     result.index.name = 'ProductBU'
     result.reset_index(inplace=True)
@@ -1746,7 +1744,9 @@ def download():
 
 @app.route('/PWeb/<url>', methods=['GET', 'POST'])
 def PWeb(url):
-    return redirect(str("http://")+str(url))
+    url = "http://" + str(url)
+    return redirect(url)
+    #return redirect(str(url))
 
 
 

@@ -75,7 +75,6 @@
 
     
     function drawBubbleChart() {
-
       var data = google.visualization.arrayToDataTable({{BubbleList|safe}});
       var options = {
         title: 'Top 7 Countries with Potential Red Hat Partners',
@@ -176,7 +175,32 @@
 
 
 <body class="no-trans"  onload="clearGraphs()" >
+1
 {{query|safe}}
+<br/>
+2
+{{dfmap|safe}}
+<br/>
+3
+{{IRingJson|safe}}
+<br/>
+4
+{{BubbleList|safe}}
+<br/>
+5
+{{DonutList|safe}}
+<br/>
+6
+{{RegionBarList|safe}}
+<br/>
+7
+{{ColumnBarListJson|safe}}
+<br/>
+region_req::
+{{region_req|safe}}
+
+
+
 <script>
 
 function clearGraphs() {
